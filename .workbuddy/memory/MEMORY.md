@@ -43,3 +43,4 @@
 
 ## 其它
 - pdms 技能 14 个 canonical（pdms-dialog/pdms-bridge/pdms-pml v2.3.0），旧版归档 skill-archive；ACCIO 同步唯一入口 `tools/sync_skills_to_accio.py`。
+- **git 备份仓（11-12）**：`C:\repos\pdmsDrawing`（C盘防U盘丢失）→ git@github.com:nss2018/PDMSDrawing；.gitignore 排除 dll/zip 等二进制只备源码。⚠️ 本机封 github.com:22，SSH 走 443（`~/.ssh/config` 已配 Host github.com→ssh.github.com:443）；key=id_ed25519，GitHub 账号 nss2018。D 盘改动需同步到 C 盘仓再 commit/push。

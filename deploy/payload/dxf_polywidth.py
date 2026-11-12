@@ -1,79 +1,23 @@
 # -*- coding: utf-8 -*-
-"""DXF post-process: set constant width on polylines of target layers.
+"""DXF post-process: clear EVERY polyline width before the block pass.
 
-User story (2026-10-26): PDMS PLOT DXF polylines print hairline-thin. User
-manually selected GT_1 layer polylines in CAD and set global width = 1.0,
-which plots with visible thickness. This script reproduces that at export
-time so the produced DXF needs no manual touch.
+2026-11-12: PDMS PLOT DXF polylines carry 0.25mm constant/vertex widths.
+dxf_postengine.py runs polyzero() BEFORE dxf_block wraps entities into
+INSERT blocks. A width pass running after block cannot reach those
+entities, so EXPLODE in CAD still shows global width 0.25.
 
-Notes:
-  - LWPOLYLINE: constant width via dxf.const_width (group 43)
-  - classic POLYLINE: no entity-level attrib in ezdxf -> set per-vertex
-    start_width/end_width (group 40/41) on every VERTEX instead
+NOTE: this file keeps its historical name dxf_polywidth.py because the
+EXE embedded-resource list and the engine import both reference it.
+The "set a thick width" feature was removed on 2026-11-12 (never used).
+
+Coverage: LWPOLYLINE group 43 + per-vertex 40/41, classic POLYLINE/VERTEX
+40/41, entity-level default widths. Scanned via doc.entitydb (modelspace,
+paper layouts, named and anonymous blocks). Idempotent, no layer filter.
 
 Usage:
-    python dxf_polywidth.py <dxf_path> [width] [layer1,layer2,...]
-    width  default 1.0
-    layers default GT_1  (comma separated, exact match, case-insensitive)
-    python dxf_polywidth.py <dxf_path> zero   -> polyzero(): clear ALL widths
-
-polyzero (2026-11-12): PDMS PLOT DXF polylines carry 0.25mm widths. The
-block pass moves them into INSERT blocks, so a width pass running AFTER
-block cannot reach them and EXPLODE in CAD still shows global width 0.25.
-polyzero() must run BEFORE block and scans the whole entity database.
-
-Idempotent. Exit code 0 = done.
+    python dxf_polywidth.py <dxf_path>     -> clear all widths, save in place
 """
 import sys
-
-
-def polywidth(doc, width=1.0, layers=("GT_1",), log=print):
-    want = {s.strip().upper() for s in layers if s.strip()}
-    changed = 0
-
-    def handle(e):
-        nonlocal changed
-        t = e.dxftype()
-        lay = (e.dxf.get("layer") or "").upper()
-        if lay not in want:
-            return
-        if t == "LWPOLYLINE":
-            try:
-                cur = float(e.dxf.get("const_width", 0) or 0)
-            except Exception:
-                cur = 0.0
-            if abs(cur - width) < 1e-9:
-                return
-            e.dxf.const_width = width
-            changed += 1
-        elif t == "POLYLINE":
-            n = 0
-            for v in e.vertices:
-                try:
-                    sw = float(v.dxf.get("start_width", 0) or 0)
-                    ew = float(v.dxf.get("end_width", 0) or 0)
-                    if abs(sw - width) < 1e-9 and abs(ew - width) < 1e-9:
-                        continue
-                except Exception:
-                    pass
-                try:
-                    v.dxf.start_width = width
-                    v.dxf.end_width = width
-                    n += 1
-                except Exception:
-                    pass
-            if n:
-                changed += 1
-
-    for e in doc.modelspace():
-        handle(e)
-    for blk in doc.blocks:
-        if (blk.name or "").startswith("*"):
-            continue
-        for e in blk:
-            handle(e)
-    log("polywidth: width=%s layers=%s -> %d polylines updated" % (width, sorted(want), changed))
-    return 0
 
 
 def polyzero(doc, log=print):
@@ -171,23 +115,18 @@ def main():
         print("NEED_EZDXF")
         return 1
     if len(sys.argv) < 2:
-        print("usage: dxf_polywidth.py <dxf_path> [width] [layers]")
+        print("usage: dxf_polywidth.py <dxf_path>")
         return 2
     dxf_path = sys.argv[1]
     doc = ezdxf.readfile(dxf_path)
-    if len(sys.argv) > 2 and sys.argv[2].strip().lower() == "zero":
-        polyzero(doc)
-    else:
-        width = float(sys.argv[2]) if len(sys.argv) > 2 else 1.0
-        layers = sys.argv[3].split(",") if len(sys.argv) > 3 else ["GT_1"]
-        polywidth(doc, width, layers)
+    polyzero(doc)
     out_path = dxf_path
     try:
         doc.saveas(out_path)
     except PermissionError:
         import os
         root, ext = os.path.splitext(dxf_path)
-        out_path = root + "_width" + (ext or ".dxf")
+        out_path = root + "_zero" + (ext or ".dxf")
         doc.saveas(out_path)
     print("OK saved " + out_path)
     return 0
