@@ -1,0 +1,10 @@
+{
+  "name": "pdms-bridge-mcp",
+  "version": "1.0.0",
+  "description": "MCP connector that lets an agent drive AVEVA PDMS 12.1.SP4 (execute PML, create drawings, query DB) via a local TCP bridge.",
+  "main": "server.js",
+  "bin": { "pdms-bridge-mcp": "server.js" },
+  "scripts": { "start": "node server.js" },
+  "engines": { "node": ">=16" },
+  "license": "MIT"
+}

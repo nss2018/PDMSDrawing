@@ -1,0 +1,21 @@
+# pdms-relay.service - systemd unit for the cloud relay
+# install: cp pdms-relay.service /etc/systemd/system/ && systemctl daemon-reload
+#          systemctl enable --now pdms-relay
+[Unit]
+Description=pdmsDrawing cloud relay (WS task router + static page)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+# EDIT: user, paths, token
+User=www-data
+WorkingDirectory=/opt/pdmsDrawing/cloud
+ExecStart=/opt/pdmsDrawing/cloud/venv/bin/python relay.py --ws-port 8765 --http-port 8766 --token REPLACE_WITH_STRONG_SECRET
+Restart=always
+RestartSec=3
+# PDF uploads can be tens of MB base64 -> raise limits
+LimitNOFILE=65535
+
+[Install]
+WantedBy=multi-user.target

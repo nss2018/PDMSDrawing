@@ -1,0 +1,42 @@
+pdmsDrawing 出图插件 · 部署说明（给装机人，一页）
+
+【前提】
+  1. 已安装 AVEVA PDMS 12.1.SP4
+  2. Windows 已启用 .NET Framework 3.5（PDMS 插件宿主是 CLR v2.0，硬要求；
+     控制面板 → 启用或关闭 Windows 功能 → 勾选 .NET Framework 3.5）
+
+【一键部署】
+  1. 把整个 deploy\ 目录拷到目标机器
+  2. 命令行进入 deploy\，执行：
+       python deploy.py
+     （PDMS 不在默认盘符时：python deploy.py --pdms "PDMS安装目录"）
+     脚本自动完成：拷 drawingPDMS.dll 到 PDMS 根目录（旧版备份 .bak）
+                   DesignAddins.xml 注册插件（防重）
+                   FangYuanPDMS.dll 缺失时自动补装
+  3. 启动 PDMS → 进入 Draft 模块 → 右侧出现「Draw(PDMS)」窗口 = 插件装好
+
+【首次初始化（每个项目库一次）】
+  PDMS 启动后（进入出图模块），在 Draft 里选中视图和图纸，命令行 Q REF 拿到引用
+  （形如 =16385/1249），然后：
+       python init_project.py --view "=视图引用" --sheet "=图纸引用"
+  自动完成：视图本地规则（管线零出图，单线由出图流程全责绘制）
+           + 自建红单线样式（CLFG/CLSTYL=SOLID/CLCOLO=红）
+  换了项目/视图需要时可用 --ruleset 指定已有规则集切换。
+
+【日常出图】
+  界面：PDMS 右侧「Draw(PDMS)」窗口手动操作。
+  自动化：bridge\ 里的脚本（需 python 3.8+，pip install pikepdf pypdfium2）：
+      python bridge_client.py --kind op --op replace_symbols
+          --params "{\"view\":\"=视图\",\"sheet\":\"=图纸\"}"
+      python bridge_client.py --kind op --op exec_cmds --params "{\"cmds\":\"SAVEWORK\"}"
+      python bridge_client.py --kind op --op export_pdf
+          --params "{\"sheet\":\"=图纸\",\"outDir\":\"D:/out/\"}"
+      python pdf_mono.py <pdf>          # PDF 转黑白（保矢量）
+
+【常见问题】
+  - PDMS 启动没有 Draw(PDMS) 窗口 → 查 .NET 3.5 是否启用；查 DesignAddins.xml 里
+    drawingPDMS 条目路径是否等于本机 PDMS 根目录
+  - 插件加载导致 PDMS 启动异常 → 删 drawingPDMS.dll.bak 同目录的 drawingPDMS.dll
+    即可还原（部署脚本不动 PDMS 其他文件）
+  - 出图样式和本机不一致 → 项目库样式/规则是首次初始化建的，跨库不同属正常，
+    重跑 init_project.py 即可

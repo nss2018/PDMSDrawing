@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  PdmsBridge.csproj — 独立 Addin 工程（.NET Framework 3.5）
+  编译：msbuild PdmsBridge.csproj
+        （或 VS 里把"目标框架"设为 .NET Framework 3.5，平台目标 AnyCPU——
+         切勿 x64：PDMS 宿主 des.exe 是 32 位，x64 程序集加载不了，2026-10-19 事故根因）
+  说明：本工程【自包含】——PdmsBridge.cs 就在同目录，无需外部相对路径。
+  引用：HintPath 已按本机 PDMS 默认安装目录 C:\AVEVA\Plant\PDMS12.1.SP4\ 填好，换机请改。
+        IAddin 接口位于 Aveva.ApplicationFramework.dll（不是 Aveva.Pdms.Addins.dll）。
+-->
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <OutputType>Library</OutputType>
+    <AssemblyName>PdmsBridge</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <!-- 2026-10-19 修复：平台目标必须是 AnyCPU（PE i386）。
+         PDMS 12.1 宿主 des.exe 是 32 位进程，x64 程序集无法加载（BadImageFormat，
+         AVEVA AddinManager 静默吞掉异常 → 桥监听器永远不启动，表现为"连不上"）。
+         旧文档"平台 x64 以匹配 PDMS"是错误假设，drawingPDMS.dll 用 AnyCPU 可正常加载。 -->
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <RootNamespace>PdmsBridge</RootNamespace>
+    <DefineConstants>$(DefineConstants);PDMS_BRIDGE</DefineConstants>
+    <WarningLevel>4</WarningLevel>
+    <ProjectGuid>{1E49D6A2-3595-CB3C-EBCC-6647BEC2C953}</ProjectGuid>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\..\..\..\..\..\..\..\AVEVA\Plant\PDMS12.1.SP4\</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- 工程自包含：两个源文件都在本目录 -->
+    <Compile Include="PdmsBridge.cs" />
+    <Compile Include="PdmsBridgeAddin.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- 以下 HintPath 请按本机 PDMS 目录修正 -->
+    <Reference Include="Aveva.ApplicationFramework">
+      <HintPath>C:\AVEVA\Plant\PDMS12.1.SP4\Aveva.ApplicationFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="Aveva.Pdms.Database">
+      <HintPath>C:\AVEVA\Plant\PDMS12.1.SP4\Aveva.Pdms.Database.dll</HintPath>
+    </Reference>
+    <Reference Include="Aveva.Pdms.Utilities">
+      <HintPath>C:\AVEVA\Plant\PDMS12.1.SP4\Aveva.Pdms.Utilities.dll</HintPath>
+    </Reference>
+    <Reference Include="Aveva.Pdms.Shared">
+      <HintPath>C:\AVEVA\Plant\PDMS12.1.SP4\Aveva.Pdms.Shared.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

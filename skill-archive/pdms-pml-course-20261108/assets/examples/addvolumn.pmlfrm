@@ -1,0 +1,49 @@
+-- addvolumn.pmlfrm —— 组合控件对话框 + Apply 收集元素（课程 P11-P12 练习）
+-- 文件名与对象名一样，后缀小写 pmlfrm
+-- 存放：Pmllib/NewPml/forms/addvolumn.pmlfrm
+-- 使用：Pml Rehash All 之后  Show !!addvolumn
+
+setup form !!addvolumn
+Title 'Add Volume'
+paragraph .cename at x0 ymax text 'No name' width 20 height 1
+text .input 'Enter text' at x0 ymax width 10 is string
+Frame .frame1 'Include' at x0 ymax+0.2
+toggle .bran 'Branch'
+toggle .equi 'Equipment'
+Exit
+button .ce 'CE' at x0 ymax tooltip 'Select pipe'
+button .ok 'OK' at x0 ymax OK
+button .apply 'Apply' at x0 ymax Apply
+button .cancel 'Cancel' at x0 ymax Cancel
+exit
+
+-- 缺省构造方法：与 Form 同名、不带参数，显示时自动执行
+-- 一般用于设置控件缺省值和回调方法
+define method .addvolumn()
+!this.bran.val = true
+!this.input.val = '1500'
+!this.ce.callback = '!this.ce()'
+!this.apply.callback = '!this.apply()'
+endmethod
+
+-- 把当前元素的全名显示在文本框里
+define method .ce()
+!this.cename.val = fullname
+endmethod
+
+-- Apply：读控件值，收集空间内的元素并 add（不关闭对话框）
+define method .apply()
+!name = !this.cename.val
+!dist = !this.input.val
+!elements = array()
+if(!this.bran.val) then
+var !elements append coll all bran Within Volume $!name $!dist
+endif
+if(!this.equi.val) then
+var !elements append coll all equi Within Volume $!name $!dist
+endif
+var !names eval name for all from !elements
+do !element value !elements
+add $!element
+enddo
+endmethod

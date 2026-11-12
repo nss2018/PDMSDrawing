@@ -1,0 +1,19 @@
+# Build artifacts / binaries (rebuildable, keep repo lean)
+*.dll
+*.pdb
+*.exe
+*.zip
+build_check/
+archive/
+bin/
+obj/
+.vs/
+
+# Python
+__pycache__/
+*.pyc
+
+# OS / cross-platform junk (U-disk AppleDouble residue)
+.DS_Store
+._*
+Thumbs.db

@@ -1,0 +1,154 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!-- pdmsDrawing 沉淀版（2026-10-20 自 radwingPDMS/drawingPDMS 复制独立成库）
+     出图引擎：headlessDrawing（replace_symbols 全流程：轴网/尺寸链/轴距行/设备标高/drawinglist）
+     + graphicsDrawing（原生 LDIM/DPPT 参考）+ PdmsBridge（127.0.0.1:18753 TCP op 通道）
+     依赖已本地化 lib\；bridge 运行脚本见 ..\bridge\（bridge_client.py / pdf_mono.py 黑白后处理 / dialog_watcher.py）
+     部署：Debug 输出仍指向 PDMS12.1.SP4 根目录（PDMS 从此处加载 drawingPDMS.dll）
+     升级：根目录 sync_from_radwing.py 一键从 radwingPDMS 同步 -->
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{B2C3D4E5-1234-5678-9ABC-000000000002}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>drawingPDMS</RootNamespace>
+    <AssemblyName>drawingPDMS</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>false</AutoGenerateBindingRedirects>
+    <Deterministic>true</Deterministic>
+    <!-- PDMS 12.1 插件宿主运行在 CLR v2.0（.NET 2.0/3.5）。必须 v3.5，否则宿主加载失败、addin 被静默跳过。 -->
+    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+    <!-- 本机只装了 v3.5 Client Profile 引用程序集，用 FrameworkPathOverride 指向该目录避免 MSB3644 -->
+    <FrameworkPathOverride>C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v3.5\Profile\Client</FrameworkPathOverride>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <!-- 开发期先输出到 bin\\Debug，部署时再拷贝 drawingPDMS.dll 到 PDMS 目录并注册 DesignAddins.xml -->
+    <OutputPath>..\\..\\..\\..\\..\\AVEVA\\Plant\\PDMS12.1.SP4\\</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <!-- 智能体桥接：编译 PdmsBridge.cs 的 TCP 监听器（#if PDMS_BRIDGE 门控），
+         见 D:\pdmsAgent\bridge\README.md 方式A -->
+    <DefineConstants>$(DefineConstants);PDMS_BRIDGE</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <DefineConstants>$(DefineConstants);PDMS_BRIDGE</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- PDMS 库统一取自 D:\NSS\repos\exportModel\exportModel\bin\Debug
+         （exportModel 工程在 PDMS12.1 实测可加载的同一套 DLL，与 PDMS 安装目录逐字节一致）。
+         只保留本工程实际引用的 8 个 AVEVA 程序集 + FangYuanPDMS + PDMSFilters；
+         PMLNet / *.Implementation 系列本工程未使用（exportModel 亦不引用），不引入。
+         FangYuanPDMS.dll 在 exportModel 中 Private=False 不拷贝输出，故单独指向 PDMS 安装目录。 -->
+    <Reference Include="Aveva.ApplicationFramework, Version=1.2.2.0, Culture=neutral, PublicKeyToken=17c64733a9775004, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\Aveva.ApplicationFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="Aveva.ApplicationFramework.Presentation, Version=1.2.2.0, Culture=neutral, PublicKeyToken=17c64733a9775004, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\Aveva.ApplicationFramework.Presentation.dll</HintPath>
+    </Reference>
+    <Reference Include="Aveva.Pdms.Database, Version=1.2.0.0, Culture=neutral, PublicKeyToken=17c64733a9775004, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\Aveva.Pdms.Database.dll</HintPath>
+    </Reference>
+    <Reference Include="Aveva.Pdms.Geometry, Version=1.2.0.0, Culture=neutral, PublicKeyToken=17c64733a9775004, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\Aveva.Pdms.Geometry.dll</HintPath>
+    </Reference>
+    <Reference Include="Aveva.Pdms.Graphics, Version=1.2.0.0, Culture=neutral, PublicKeyToken=17c64733a9775004, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\Aveva.Pdms.Graphics.dll</HintPath>
+    </Reference>
+    <Reference Include="Aveva.Pdms.Shared, Version=1.2.0.0, Culture=neutral, PublicKeyToken=17c64733a9775004, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\Aveva.Pdms.Shared.dll</HintPath>
+    </Reference>
+    <Reference Include="Aveva.Pdms.Utilities, Version=1.2.0.0, Culture=neutral, PublicKeyToken=17c64733a9775004, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\Aveva.Pdms.Utilities.dll</HintPath>
+    </Reference>
+    <Reference Include="FangYuanPDMS">
+      <HintPath>..\..\..\lib\FangYuanPDMS.dll</HintPath>
+    </Reference>
+    <Reference Include="PDMSFilters">
+      <HintPath>..\..\..\lib\PDMSFilters.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="MaterialReport.cs" />
+    <Compile Include="Utilities.cs" />
+    <Compile Include="Paragon.cs" />
+    <Compile Include="PdmsCommand.cs" />
+    <Compile Include="drawAddin.cs" />
+    <Compile Include="drawCmd.cs" />
+    <Compile Include="drawTool.cs" />
+    <Compile Include="drawingStandard.cs" />
+    <Compile Include="layerManager.cs" />
+    <Compile Include="drawE3D.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="drawE3D.Designer.cs">
+      <DependentUpon>drawE3D.cs</DependentUpon>
+    </Compile>
+    <Compile Include="drawE3DTool.cs" />
+    <Compile Include="viewTest.cs" />
+    <Compile Include="graphicsDrawing.cs" />
+    <Compile Include="nameSystem.cs" />
+    <Compile Include="nozzEntity.cs" />
+    <Compile Include="PdmsBridge.cs" />
+    <Compile Include="headlessDrawing.cs" />
+    <Compile Include="annotationPlanner.cs" />
+    <Compile Include="ChemSymbols.cs" />
+    <Compile Include="SymBlocks.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="usefulTool.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="drawE3D.resx">
+      <DependentUpon>drawE3D.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <None Include="App.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- 绕过 dotnet build 无法运行 ResGen.exe 的环境限制 -->
+  <Import Project="_buildfix.targets" />
+</Project>

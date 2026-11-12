@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-page-node-id="kMdmiSYywlWBjTQPJ54LiP">
+<head data-page-node-id="vzsCJBDNOxoUvuOpGVnCUh">
+<meta charset="utf-8" data-page-node-id="lhQvYe8AcKQH7Z36kVkDPy">
+<title>技能整合 + 主工程迁移简报 · 2026-11-08</title>
+<style>
+  :root{
+    --bg:#f6f7f9; --card:#ffffff; --ink:#1f2937; --sub:#5b6472;
+    --line:#e3e7ed; --accent:#1f6f5c; --accent-soft:#eaf4f0;
+    --warn:#a8661b; --warn-soft:#fdf3e4; --mono:#3b4654;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+       font:15px/1.7 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;}
+  .wrap{max-width:1060px;margin:0 auto;padding:36px 26px 60px}
+  header{border-bottom:2px solid var(--accent);padding-bottom:18px;margin-bottom:28px}
+  h1{font-size:27px;margin:0 0 8px;letter-spacing:.3px}
+  .meta{color:var(--sub);font-size:13px}
+  .badge{display:inline-block;background:var(--accent-soft);color:var(--accent);
+         border:1px solid #cfe5dc;border-radius:4px;padding:2px 9px;font-size:12px;margin-left:8px}
+  section{background:var(--card);border:1px solid var(--line);border-radius:10px;
+          padding:22px 24px;margin-bottom:22px;box-shadow:0 1px 3px rgba(20,30,45,.04)}
+  h2{font-size:19px;margin:0 0 6px;color:var(--accent)}
+  h3{font-size:15px;margin:22px 0 8px;color:var(--mono)}
+  p{margin:8px 0}
+  .lead{color:var(--sub);font-size:14px;margin-bottom:14px}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;margin:10px 0 4px}
+  th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+  th{background:#f1f4f7;color:var(--mono);font-weight:600}
+  code{font-family:Consolas,"SFMono-Regular",Menlo,monospace;font-size:12.5px;
+       background:#f2f4f7;border-radius:3px;padding:1px 5px;color:#2b3a4a}
+  .ok{color:var(--accent);font-weight:600}
+  .warn{color:var(--warn);font-weight:600}
+  .box{background:var(--accent-soft);border-left:3px solid var(--accent);
+       padding:11px 14px;border-radius:0 6px 6px 0;font-size:13.5px;margin:14px 0}
+  .box.warnbox{background:var(--warn-soft);border-left-color:var(--warn)}
+  ul{margin:8px 0 8px 20px;padding:0}
+  li{margin:4px 0}
+  .kpi{display:flex;gap:14px;flex-wrap:wrap;margin:14px 0 4px}
+  .kpi div{flex:1;min-width:150px;background:#f8fafb;border:1px solid var(--line);
+           border-radius:8px;padding:12px 14px}
+  .kpi b{display:block;font-size:22px;color:var(--accent);line-height:1.2}
+  .kpi span{font-size:12px;color:var(--sub)}
+  footer{color:var(--sub);font-size:12.5px;text-align:center;margin-top:10px}
+</style>
+</head>
+<body data-page-node-id="CEoJIWCdPwgjDQqqru4QP4">
+<div class="wrap" data-page-node-id="cENm5ILgWWY3sokO16FqYT">
+
+<header data-page-node-id="IK64joPGVhTHOS2IHkibRz">
+  <h1 data-page-node-id="ytLSrg9jwd86oNFpyPbgQi">技能整合 + 主工程迁移简报 <span class="badge" data-page-node-id="nLmKEwmPKC9bdkRfmWfgtn">2026-11-08</span></h1>
+  <div class="meta" data-page-node-id="Y8CxeJodeWzHQ2TDHqfYz6">聂工确认：11-06 版 <code data-page-node-id="OVHMhHlNLP6Ta45gUQbvim">D:\repos\drawingPDMS</code> 为最新主工程；本轮同时完成 pdms 系列技能去重与首轮优化迁移。</div>
+</header>
+
+<section data-page-node-id="NIDP3dY3DVsRAytmscgn8A">
+  <h2 data-page-node-id="02hduicqpUycPT2qFmYbwC">一、pdms 系列技能整合</h2>
+  <p class="lead" data-page-node-id="MSrPoWDE3pUDOygtcgRwVy">按 <code data-page-node-id="vnP06stg07hvRNcSDrGskh">skill-merge-pack</code> 流程执行：盘点 → 全局交叉引用 → 定 canonical 名 → staging 合并 → 改写死链 → 打包校验 → 先装后归档 → 验收。</p>
+  <div class="kpi" data-page-node-id="9ahefq3CJqrVNhtoCcP12P">
+    <div data-page-node-id="E8dkfINjkEr0knaU1dBfom"><b data-page-node-id="OqedtYVqKQD1XPfLuWVWJM">17 → 14</b><span data-page-node-id="QBdMAOEGyVHTIiNDykk4Nf">pdms 技能数量</span></div>
+    <div data-page-node-id="y44DuTIlGF04FZtGF8tY1g"><b data-page-node-id="2VPgVWD7QwLwvAv8COdaeS">3 对</b><span data-page-node-id="6O3m5QRyj1GpQhUfiHBYOC">重叠组全部处理</span></div>
+    <div data-page-node-id="Q3QsngV4BoCgUaXdmgBpIv"><b data-page-node-id="tG4kb8sZmjLexSb13o4K1D">7 处</b><span data-page-node-id="H73ZF0zyFxmBwAeijit6m6">引用改写（6 外部 + 1 内部）</span></div>
+    <div data-page-node-id="L6NvSi4nIxtC79kNci7bkT"><b data-page-node-id="4lKLcGuA2TD5Kp6qp5IDrA">3 份</b><span data-page-node-id="uNB6bwj4kFHVPxbMsSA0Pj">单根 zip 备份</span></div>
+  </div>
+
+  <table data-page-node-id="YAQiWDeObVHSsAh5Ad0SSk">
+    <tr data-page-node-id="4ueIllKhCUg35wwhx9RP7w"><th data-page-node-id="VK6I874TAfapxDuTlvNrVL">原技能对</th><th data-page-node-id="MHoQIKZ42ZiSQ6An4lePtv">判定</th><th data-page-node-id="Kci9DtAFUS6uOgi03LD9Jm">canonical（保留名）</th><th data-page-node-id="Ih3FOTC6OR1182Fne3WmhA">新增资源</th><th data-page-node-id="bm3dLqERRLAZ86J1YSHOYL">归档位置</th></tr>
+    <tr data-page-node-id="kfjuvJ3kjoDRVOJDJFCU8K">
+      <td data-page-node-id="Gvh3AcJwiK291wj6o4zdlz"><code data-page-node-id="JuXLTTnEB5uBh1NW4mvr0y">pdms-dialog</code><br data-page-node-id="37Jg3MdsMtQmZ4sikqsjKJ"><code data-page-node-id="LgfVtWFVrOTuKRxc9x7O6s">pdms-dialog-autoclose</code></td>
+      <td data-page-node-id="vuCQRYjYSfdzu5nDPAepWk">互补两套：交互式取证（PS 三件套）vs 常驻看门狗（dialog_watcher / ModalClose）→ <span class="ok" data-page-node-id="yB55O8W5R6JVfsmbbycVD5">真合并</span></td>
+      <td data-page-node-id="LBTMCHV9RwSKAaJoVdqbGG"><code data-page-node-id="sNdCvxzcvfuikwcrjXqDQ9">pdms-dialog</code> v2.0.0（被 6 处外部引用，外链不断）</td>
+      <td data-page-node-id="AF8babfFb4t9L4PIDjaSEe"><code data-page-node-id="Y8jdlnimd9ou40UObj3pyK">references/auto-close-watchdog.md</code>（旧技能全文 + 本机实体路径）</td>
+      <td rowspan="3" data-page-node-id="1hSFB93pt0BFfOuZwJnVXN"><code data-page-node-id="m2wyhdQybZbhHaOJFOcIB9">D:\repos\pdmsDrawing\skill-archive\&lt;name&gt;-20261108</code></td>
+    </tr>
+    <tr data-page-node-id="ajA8DHY5rNjrP3oKWTt3uO">
+      <td data-page-node-id="b5DfQgGeNdifSu27xtmtq9"><code data-page-node-id="YQ8liXm7am64mtrhqUwi5z">pdms-bridge</code><br data-page-node-id="2nHsGMwn4Hc02il7puLyWE"><code data-page-node-id="yS2rggwl4D5Z6lJjvhlL9A">pdms-bridge-probe</code></td>
+      <td data-page-node-id="WSB9MZdWYxVQt7uU0yf3FZ">互补：连接器架构 vs Socket 探活 / 长宏分步下发 / 止损线 → <span class="ok" data-page-node-id="DCI97E1GXUQB3gCVsVDe7l">真合并</span></td>
+      <td data-page-node-id="HBFzqrSWwcCh6btAxMRNAf"><code data-page-node-id="WkRb7xKckWCGqowcS7WIP0">pdms-bridge</code> v2.0.0（被 15+ 处引用）</td>
+      <td data-page-node-id="Ms3tmEm6hBVLfj7VJpeAAL"><code data-page-node-id="lEpe8X8CXthM5OQ5WVMZ96">references/probe-and-macro-batching.md</code> + 主文件「会话探活与防阻塞」章节</td>
+    </tr>
+    <tr data-page-node-id="sqylAj0qjGrkBECUQ70ZWK">
+      <td data-page-node-id="62mzRrConcNBg2Dq2tyfPW"><code data-page-node-id="H0xkjsCMX0hoTOTBbhuUKK">pdms-pml</code><br data-page-node-id="7U1U49KjrV1PGLbhKa89Hv"><code data-page-node-id="SodjOQ5fLZCbYDBsD2nyQD">pdms-pml-course</code></td>
+      <td data-page-node-id="TuPU8YgcJx5FzcvanpoHaA"><span class="warn" data-page-node-id="s3ncWssekqgjWGKcQisChc">不是合并，是清理残留副本</span>：<code data-page-node-id="UurRFdwxdzpx3cekWD5E7R">pdms-pml</code> v2.1.0 早已写明「由两者合并而成」；course 的 20 个文件全是 pml 的子集，3 处 diff 只是外链改写，无独有内容</td>
+      <td data-page-node-id="qnarztCchDz0S3D54EpgPO"><code data-page-node-id="zaWsowHWVVCgRyUTBU1eDs">pdms-pml</code> v2.3.0（升版本 + 归档溯源说明）</td>
+      <td data-page-node-id="sexwZBPDiVh6OE2Y5plZIj">无（文件数保持 25，内容零丢失）</td>
+    </tr>
+  </table>
+
+  <h3 data-page-node-id="KgwKEiXci7HNrkVGUbTUEF">死链改写（7 处：外部 6 + 合并版内部 1）</h3>
+  <p data-page-node-id="FE9AmDDl1JkdxiICL6Q5dz"><code data-page-node-id="rlapjKyaJGFfXeFcFDGJFv">pdms-expert/references/postmortems.md</code>、<code data-page-node-id="qr2R1KJxtsq9rvvSwyNhth">discipline.md</code>、<code data-page-node-id="eCUDzzvQZ4ZKKA2YAEIiT7">pdms-run-macro/SKILL.md</code>（2 处）、<code data-page-node-id="ezHhaxrxTYX5qNDfiP2HuN">pdms-uda-udet-mdb/SKILL.md</code>（2 处）、<code data-page-node-id="cWF3eJe4phu3NQmf8OIGNB">pdms-pml/references/pml-gotchas.md</code>。验收 grep：旧名只剩「迭代说明 / 资源溯源 / （原 xxx）说明 / 归档目录」，<span class="ok" data-page-node-id="3byuK02POaFsM9OFh8MUXw">无任何独立技能引用残留</span>。</p>
+
+  <div class="box" data-page-node-id="2Wvx6WEl1TmOIqNGJ9ywqp">
+    <b data-page-node-id="gQI0vz0Yi5cAvpk77fF2bS">验收证据</b>：三份 zip 顶层均为单根 <code data-page-node-id="CtTQqfqWpD7Clc3eL7XpGy">&lt;name&gt;/</code>、<code data-page-node-id="CsHxYpBAGtEUagiGT5U08Y">SKILL.md</code> 在位、<code data-page-node-id="yTBkCN0ma7D5taY4nSCYj9">testzip()</code> 通过（6 / 36 / 25 文件）；frontmatter <code data-page-node-id="LMEG92hKgrCEEXix3ym2V5">name / version / agent_created</code> 全部合法；旧目录全部 <code data-page-node-id="oiUAS4Cu5Genqm4hepEfHX">mv</code> 归档（绝不 rm）；skills 目录现为 14 个 pdms 技能。
+  </div>
+
+  <h3 data-page-node-id="MVGI7uiW1uKlBbU7sl3v75">顺手修了流程本身</h3>
+  <p data-page-node-id="HLDHMdM1xUXyRglAKnUfpn"><code data-page-node-id="pME42RHaVrP2iWX9g05pdk">skill-merge-pack</code> 补了 3 条坑（CRLF 锚点、canonical 同名覆盖式安装、死链验收判据）和 1 个「历史残留副本」变体章节——本次 <code data-page-node-id="63cRbzi3FXSmLlHUmc4Bv5">pdms-pml-course</code> 就是被原流程第 10 步「文件数 = 两边之和」误判的场景。</p>
+</section>
+
+<section data-page-node-id="WE2y7884pVdvsz6iL53Tcw">
+  <h2 data-page-node-id="NMKPSVGuIMsgkphr13L8d2">二、首轮优化迁移到 11-06 主工程</h2>
+  <p class="lead" data-page-node-id="t6il0TNuq07Zsi1b9gvF3r">主工程 <code data-page-node-id="EtjyFByehO7WEC4KY0ChJ4">D:\repos\drawingPDMS</code>（headlessDrawing.cs 8856 行，含管口方位图、原比例分页、9f 提速、DrawingWizard）确认为最新；<code data-page-node-id="6cJPP3qANNcllXrLimo7Ou">D:\repos\pdmsDrawing</code> 保留为桥接 / 编排侧仓库。</p>
+
+  <table data-page-node-id="kIYcIjQ83kwDLjRPRQwu5d">
+    <tr data-page-node-id="wOZRarfVtd7AFlWwZ6Wiki"><th data-page-node-id="iq2zRysJcvCbl230sY68DG">文件 / 位置</th><th data-page-node-id="dvGuN37aIKbPJFQaCv9UOY">改动</th></tr>
+    <tr data-page-node-id="PkfQfTXSoxrHCiu35FHFjm"><td data-page-node-id="A3UdITDRessDmJgQNA28XE"><code data-page-node-id="tbhT4Wouz0yKJuYqdhBRnx">drawingStandard.cs</code>（新增）</td><td data-page-node-id="fZq00xZzY2TBC2ws2CuOTM">规范集中配置：预设 <code data-page-node-id="EL0T4q8ES30nDqb63OSqMD">project</code>（零行为变化）/ <code data-page-node-id="5O3g0EC8ZEiDsOaXXFRN5W">HG20519</code> / <code data-page-node-id="3TuvJfiWLdEv0daYz89Kck">SH3052</code>，字高 / 图幅 / 比例 / 三档线宽 / 45° 引线角度与右上&gt;左上优先级，支持逐图参数覆盖。<b data-page-node-id="p3HsHLP24qrF4y5KDvFr5Q">主工程无 layerManager.cs，故去掉图层覆盖 API</b>，避免 CS0246。</td></tr>
+    <tr data-page-node-id="7iqKKv80FizqFrDQcCJhJg"><td data-page-node-id="i20JMK3sNtjuDBVsh34fpB"><code data-page-node-id="BRMFSIGBBSwMMhDKKjMEC8">drawingPDMS.csproj</code></td><td data-page-node-id="Kev2KVHLbFJJHNMehULJ6j">逐项 <code data-page-node-id="5r3LU3GEqcMWVjNPvYmBIS">&lt;Compile Include&gt;</code> 登记 <code data-page-node-id="elnVeiEibrPF7C4ZwMTurF">drawingStandard.cs</code>（该 csproj 非 glob）。</td></tr>
+    <tr data-page-node-id="pb7aP4HNqrWBIuBrwrDcFy"><td data-page-node-id="EUv0DRGPJz7d5jfyFCLrZF"><code data-page-node-id="77tAWUEyGU96kFqrnCpBEE">headlessDrawing.cs</code></td><td data-page-node-id="hvyt1C2IBWZhox4sX1IfCd"><code data-page-node-id="PDntJrueVV3g4PE0DNJ61r">CreateDrawing</code>（约 577 行）与 <code data-page-node-id="cxXedNA6R86JLnBCrNAb61">ReplaceSymbols</code>（约 5739 行）入口各接 <code data-page-node-id="W3oMbI0UFjGasefrifuzuf">Apply → Summary → Validate</code>，写 <code data-page-node-id="k5nDnfKHELJoqnXn9SHq7J">[STD]</code> / <code data-page-node-id="57smTZx2GxfaeGoac6eFF3">[STD-WARN]</code> 到 op 日志。<b data-page-node-id="xEk7nc7doXlEWxlvjUsoit">只加日志与校验，不改任何出图几何。</b></td></tr>
+    <tr data-page-node-id="6cTlgKjQKFWPQu4Er6VW21"><td data-page-node-id="13E5XrN5KIzoy1WveZv7vZ"><code data-page-node-id="KIErpc0lTapxMn2zbSt93f">tools/batch_draw.py</code></td><td data-page-node-id="OovwgcmyW9DSBt8Etgs3nq">批量 / 无人值守驱动，新增按路径动态加载 <code data-page-node-id="sMioQ53A9X8okR5kDeyHQ4">wizard.py</code>（<code data-page-node-id="KCc3KITBEqs3DqTSuL5x9M">--wizard-dir</code> / <code data-page-node-id="c49RPzDq0lqIbUamNybnK7">PDMS_WIZARD_DIR</code> / 默认 <code data-page-node-id="C614ltrI1Fs2UBMDOmwwNO">D:\repos\pdmsDrawing\bridge</code>），不启动向导 HTTP 服务；<code data-page-node-id="4LGKSL3uF2iOLTJ0HEuOtg">--dry-run / --resume / --retry / --only</code>，产出 report.md/json + PDF/logs 归档。</td></tr>
+    <tr data-page-node-id="5GWj2R3VTrbpTaD8d91fUZ"><td data-page-node-id="AtuhV8DboaUsPvVpD3II8Z"><code data-page-node-id="CBC5akgyPZpPadyRcVgH2A">tools/batch_jobs.example.json</code></td><td data-page-node-id="bv0Tw8mZ0hlpw4q8RgmmP3">3 张图示意清单（占位参数，实跑前替换 view/sheet/elements）。</td></tr>
+  </table>
+
+  <h3 data-page-node-id="2TKcju7SKwSZtgBXFqFR3l">验证</h3>
+  <ul data-page-node-id="CtuFvF3OqpDLshCao5vH02">
+    <li data-page-node-id="qZLZPfrOBiQeyonicAPrqz"><span class="ok" data-page-node-id="IkYFIHAUGlYFp4qDpq0YRD">dotnet build 0 错误</span>；8 个警告全部为既有（6 × MSB3270 x86/MSIL 架构不匹配 + 2 个未用变量），与本次改动无关。</li>
+    <li data-page-node-id="rwtp6PZnOmCenabBIaJrHU"><code data-page-node-id="PtIQbtfZAwlLyLij7W52nW">load_wizard()</code> 实测导入成功（<code data-page-node-id="AeIDhhYJXXgwVJ9jcBoglq">PLATFORM_VER = v4.0</code>），向导服务未被拉起。</li>
+    <li data-page-node-id="eeoR3EGSB3O5KawHkzhDGC">dry-run：3 图「2 成 1 败」→ <code data-page-node-id="o5hJP0rKNf1WKtJKGhwJNE">--resume --retry 1</code> 全绿，report.md 生成；<code data-page-node-id="bobtkpLb0clPpvuPoKuSGS">-W error::SyntaxWarning</code> 编译零告警。</li>
+    <li data-page-node-id="XASRMjz6DxCiTuxhEbiS2p"><span class="ok" data-page-node-id="zAL6hmiGvN3FtGu3TDXVNC">本轮编译产物未部署到安装目录</span>：构建用 <code data-page-node-id="zzdfKfm41KWTeBDihp5zIF">-p:OutputPath=build_check\</code> 重定向（csproj Debug 默认 OutputPath 就是 <code data-page-node-id="kBP8FGeZBsUwBsSkhky3qp">C:\AVEVA\Plant\PDMS12.1.SP4\</code>，直接 build 会覆盖实机 dll）。<code data-page-node-id="YcTFSocJYSox7xXqQm4Cnx">build_check</code> dll hash 全程稳定 <code data-page-node-id="C13OPvAXmBFE8Rs1f81FxT">f94d4794…</code>；安装目录 dll 在本会话期间被<b data-page-node-id="E8jLA8mEGbmZsDvHC77BTV">外部进程</b>改写过两次（10:29 = <code data-page-node-id="MOFH3duqHBC5NenmOnFPiv">52477be4…</code> → 10:38 = <code data-page-node-id="F380eta0wlf4NIQdAixqKd">6167738d…</code>，应为 14a 那轮部署），与本轮构建无关。</li>
+  </ul>
+
+  <div class="box warnbox" data-page-node-id="Uu0HzlQjIMl7dL1VVOeWhG">
+    <b data-page-node-id="rNfi8gUXBP1STcUQ3oU9dS">部署前必读</b>：要让规范配置在 PDMS 实机生效，仍需把新 dll 部署到安装目录并重启模块；部署前确保所有 <code data-page-node-id="n09GdwPrJpOAE5u06ksK7Z">des.exe</code> 已退出（文件锁会导致无声失败）。本轮<b data-page-node-id="EdRmnpvwxAtwkd25vN4g3H">没有</b>动安装目录、也没有 PDMS 实机出图验证。
+  </div>
+
+  <h3 data-page-node-id="fUzwoAASWe8BrZjkmfr55G">与沉淀版的差异（如实记录）</h3>
+  <ul data-page-node-id="SU4c63qr9tkAAvh7QPszyq">
+    <li data-page-node-id="5rfaC63tLJFudHhWvZZ6gv">主工程<b data-page-node-id="trhmIYmBUW4i1GHDA3y9Ly">没有 5 图层归层</b>（layerManager.cs 只在 pdmsDrawing 沉淀版），所以图层名/色/线型的规范覆盖没迁。</li>
+    <li data-page-node-id="BA54Mus4m4idD4I7um2Qas">主工程 <b data-page-node-id="TWLO9nBSAVgyVXTrnC9mHL">9j 引出标注是「背向中心径向引线」</b>，且管道布置图默认 <code data-page-node-id="3fECJEVYcB1k7dmng8NZiz">leadDim=0</code> 关闭；沉淀版 10-28 修的 45° 斜引线不在这个副本。本轮<b data-page-node-id="fUZ7AibCJzZtTjmyI7gOiK">没动</b>角度逻辑，<code data-page-node-id="BvkM5DwdDZemlK595cJtcG">DrawingStandard.LeaderAngles()</code> 作为预留 API 保留，等实机确认后再接。</li>
+  </ul>
+</section>
+
+<section data-page-node-id="iDU4TUuImWqo2om3t3COn3">
+  <h2 data-page-node-id="BtgZyy9uevm8g2f2VGxkpa">三、下一轮可选</h2>
+  <ul data-page-node-id="XTIL2LF1KDLseYLfdoKKeb">
+    <li data-page-node-id="folsNO47M18E4Lgd6xH2i6"><b data-page-node-id="HngJ9egJoF4prs1LXlrULW">A</b> 实机部署 + 跑一张图验证 <code data-page-node-id="tCY7SDitU1H4ra9jcmEoUI">[STD]</code> 日志与 <code data-page-node-id="LovyU2dDD5R0CY1HY7floo">standard=HG20519</code> 参数覆盖（建议先做，闭环本轮）。</li>
+    <li data-page-node-id="iyhkrEqEMVf53ei4no6TIB"><b data-page-node-id="38mpCiVYbDiLGgSf7El2Ik">B</b> 出图质检闭环：把 <code data-page-node-id="fwt6uUg8j7eDRObtqhIMP3">DrawingStandard.Report()</code> 接进 <code data-page-node-id="KS08VqcCjaewBWcNBzSdnI">batch_draw.py</code> 的汇总报告，逐图留规范证据。</li>
+    <li data-page-node-id="RQBGvkSjqaEV34SdqHG0Ll"><b data-page-node-id="0PJ1RVgXgMFl690gw0np9S">C</b> 把 45° 引线接进主工程标注摆放（<code data-page-node-id="9xk2FYZCIWJkKm7jJYYLdt">angs9</code> 候选环重排），需先看实机截图再定。</li>
+    <li data-page-node-id="Cbd9gzLSAP4GlDdmwM0zIl"><b data-page-node-id="JFDlpsi7HuCfmsF1aTlxJP">D</b> 线宽落 PDMS STYL / 5 图层归层迁到主工程——这两个都会改变出图外观，单独一轮做。</li>
+  </ul>
+</section>
+
+<footer data-page-node-id="6YMttEmdpYibbyF36bIcDz">PDMS大拿 🔧 · 证据优先：只信日志、hash、编译输出与 dry-run 结果，不信返回值</footer>
+</div>
+</body>
+</html>

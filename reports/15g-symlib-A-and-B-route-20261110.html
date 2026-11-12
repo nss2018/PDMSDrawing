@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>15g 图例入库（A 实施）与 B 自动出图例路线 · 2026-11-10</title>
+<style>
+  :root{--bg:#f6f7f9;--card:#fff;--ink:#20242b;--sub:#5b6472;--line:#e3e7ec;--blue:#2563eb;--green:#15803d;--amber:#b45309;--red:#b91c1c}
+  body{margin:0;padding:32px 20px 64px;background:var(--bg);color:var(--ink);font:14px/1.72 -apple-system,"Segoe UI","Microsoft YaHei",sans-serif}
+  .wrap{max-width:1080px;margin:0 auto}
+  h1{font-size:25px;margin:0 0 6px;letter-spacing:-.3px}
+  .sub{color:var(--sub);font-size:13.5px;margin-bottom:24px}
+  h2{font-size:18px;margin:34px 0 12px;padding-left:11px;border-left:4px solid var(--blue)}
+  h3{font-size:15px;margin:22px 0 8px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px 20px;margin:14px 0}
+  .kpi{display:flex;gap:12px;flex-wrap:wrap;margin:14px 0}
+  .kpi div{flex:1;min-width:150px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+  .kpi b{display:block;font-size:19px;letter-spacing:-.3px}
+  .kpi span{color:var(--sub);font-size:12.5px}
+  table{width:100%;border-collapse:collapse;background:var(--card);font-size:13.2px;margin:10px 0}
+  th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+  th{background:#eef2f7;font-weight:600}
+  code,pre{font-family:Consolas,"Courier New",monospace}
+  code{background:#eef2f7;padding:1px 5px;border-radius:4px;font-size:12.5px}
+  pre{background:#1f2328;color:#e6edf3;padding:14px 16px;border-radius:8px;overflow-x:auto;font-size:12.3px;line-height:1.62;margin:10px 0}
+  .warn{background:#fff7ed;border-left:4px solid var(--amber);padding:12px 16px;border-radius:6px;margin:14px 0}
+  .danger{background:#fef2f2;border-left:4px solid var(--red);padding:12px 16px;border-radius:6px;margin:14px 0}
+  .ok{background:#f0fdf4;border-left:4px solid var(--green);padding:12px 16px;border-radius:6px;margin:14px 0}
+  ul,ol{padding-left:22px}li{margin:5px 0}
+  .foot{color:var(--sub);font-size:12.5px;margin-top:32px;border-top:1px solid var(--line);padding-top:14px}
+  .tag{display:inline-block;font-size:11.5px;padding:2px 8px;border-radius:20px;background:#e8eefc;color:#1d4ed8;margin-right:6px}
+</style>
+</head>
+<body><div class="wrap">
+
+<h1>15g · 图例入库（A 已做）与自动出图例（B 路线）</h1>
+<div class="sub">2026-11-10 · 主工程 D:\repos\drawingPDMS · 沉淀版 D:\repos\pdmsDrawing · 聂工</div>
+
+<div class="kpi">
+  <div><b>13</b><span>个 SYTM 模板（HG20519 图例）</span></div>
+  <div><b>2 通道</b><span>库引用优先 / 直接画线兜底</span></div>
+  <div><b>0 错误</b><span>编译（8 个既有警告，无新增）</span></div>
+  <div><b>44b42675…</b><span>15g DLL SHA256，三处同哈希</span></div>
+</div>
+
+<div class="card">
+  <b>一句话结论</b>：A 的代码侧<b>已全部落地并部署</b>——出图时自动在 LIBRARY 世界建 <code>LIBY → SYLB → 13×SYTM</code>，
+  符号改由 <code>SLABEL.TMRF</code> 引用库模板；任一步失败自动退回原来的 9200 条线段画法，<b>出图零退化</b>。
+  但 PDMS 现在<b>没开</b>，数据库里那 13 个对象要等重启模块后首轮 <code>replace_symbols</code> 才会真正落地，
+  验收看 <code>(15g)</code> 日志 + 新截图。B 的官方链路已查清，写在下半部分，<b>本轮没动项目库</b>。
+</div>
+
+<h2>一、A 做了什么</h2>
+
+<h3>1. 根因与层级定案</h3>
+<p>2026-10-17「SYTM 建库失败」不是 API 不行，是<b>父级挂错世界</b>。本机旧日志实证三次失败全在
+<code>DEPT.CreateLast(LALB)</code>；而 14p（11-08）已证 <code>WORLD → LIBY → RPLB → STYL</code> 四级可建。
+AVEVA Draft 官方文档写明：SYTM 是 Library sheet 上的 2D drafting 元素集合，<code>SYLB / LALB</code> 视为 sheet，
+必须挂在 <code>LIBY</code> 下；<code>SLAB / SYMB</code> 的 <code>TMRF</code> 指向 SYTM 即在 SHEET 上渲染。
+所以正解是 <b>DEPT/REGI → LIBY → SYLB → SYTM</b>（LALB 承载 TXTM，历史上把 SYTM 挂 LALB 也是错的）。</p>
+
+<h3>2. 代码改动（段号 15g）</h3>
+<table>
+  <tr><th>文件</th><th>改动</th></tr>
+  <tr><td><code>SymBlocks.cs</code></td><td>
+    ① 新增 <code>EnsureLibrary</code> 真建库：donor 只读探针 → 多候选父级找/建 LIBY → 找/建 SYLB（失败试 LALB）→
+    13 个 SYTM 各写入局部线段几何 → 回读成员数验证；<br>
+    ② 新增 <code>Insert</code> 库优先分支：<code>LibLayer.CreateLast(SLABEL)</code> + <code>TMRF/ADEG/FCOLOU/LLEA/DDNM</code>
+    + <code>at x y</code>（进现有 batch 一次下发），回读 TMRF 验真；<br>
+    ③ 全链路 best-effort：建库失败、宿主不合法、TMRF 回读空、15c 带缩放的阀门，<b>一律回退直接画线</b>；<br>
+    ④ 命名失败（14p 实证 LIBY 世界 SetAttribute(NAME) 会抛错）时按<b>内容识别 + 建库顺序</b>幂等复用，避免每轮累积匿名 LIBY。
+  </td></tr>
+  <tr><td><code>headlessDrawing.cs</code></td><td>
+    ① <code>ReplaceSymbols</code> 入口读 <code>symLib</code> / <code>symLibRebuild</code> 参数并建库；<br>
+    ② 库 READY 时才在 VIEW 下新建「管道符号库引用」LAYER（SLABEL 的合法宿主是 LAYER，不能挂 NOTE）；<br>
+    ③ 符号批下发后新增 <code>(15g) 符号库验收</code> 行；<br>
+    ④ <code>CreateDrawing</code> 阶段显式关闭库通道，把建库<b>收敛到 replace_symbols</b>，避免未登录 DRA 世界时误建/重复建；<br>
+    ⑤ <code>create_sym_blocks</code> op 从「已废弃」改成真建库入口，失败会在结果里报诊断。
+  </td></tr>
+</table>
+
+<h3>3. 部署与证据</h3>
+<pre>编译   dotnet build -p:OutputPath=...\build_check_15g\  → 0 error / 8 既有 warning
+DLL    554,496 B   SHA256 44b4267520f70ae77a41a84eacb9b0e0327fc0c376fa2c1deee3c1844c04f8e5
+部署   C:\AVEVA\Plant\PDMS12.1.SP4\drawingPDMS.dll  = 同哈希
+       D:\studio\drawingPDMS.dll                    = 同哈希
+       build_check_15g\drawingPDMS.dll              = 同哈希
+备份   ...SP4\drawingPDMS.dll.bak_15f_20261110      (15f, 79fecb2f…)
+源码   diag\SymBlocks.cs.bak_pre15g_20261110_102005
+       diag\headlessDrawing.cs.bak_pre15g_20261110_102006
+二进制 UTF-16 段号串验真：(15g) 符号库验收 / (15g) 符号库 = / LIB-SUMMARY (15g) / SLABEL 插入失败
+                          / symLib=0 -> 直接画线模式；15f 的 (15f) 13n 页框修正 仍在</pre>
+
+<div class="warn"><b>当前状态：PDMS 桥 18753 端口 ECONNREFUSED，模块全部未启动。</b>
+数据库里的 LIBY/SYLB/SYTM 对象<b>尚未真实存在</b>；本轮交付的是「会自己建库 + 会自己引用 + 会自己兜底」的引擎。
+部署 DLL 期间 PDMS 未开，不涉及热替换。</div>
+
+<h3>4. 重启后怎么验（4 步）</h3>
+<ol>
+  <li><b>重启全部 PDMS 模块</b>（Design / Draft / Paragon / Admin），让新 DLL 载入。</li>
+  <li>可选：先跑一次命令通道探针 <code>$M /D:/pdmsAgent/bridge/agen_symtest_15g.pml</code>，
+      结果文件 <code>result_symtest_15g.txt</code> 会显示 LIBY/SYLB/SYTM/STRAIGHT 四级命令是否全通；
+      宏已双写 C:\pdmsAgent\bridge\ 与 D:\pdmsAgent\bridge\，注释全 ASCII。</li>
+  <li><b>正常重出一次图</b>（create_drawing → replace_symbols）。日志 <code>D:\pdmsAgent\bridge\op_replace_symbols.log</code> 看这几行：
+    <pre>(15g) donor /MDS/ABA/TAGS/CIRCLE/2 type=SYTM ...
+(15g)   owner0 type=... （真实层级，一次定案）
+(15g) 类型解析 LIBY=... SYLB=... SYTM=有
+(15g) LIBY 新建/复用 ... / SYLB 就绪 ...
+(15g) SYTM VALVE 几何=8/8 类型=STRAIGHT 定位失败=0
+(15g) 符号库 = READY 模板 13/13（本轮走 SLABEL.TMRF 库引用）
+(15g) 符号库验收 = READY 模板13/13 SLABEL插入N 回退画线N 宿主禁用=False</pre>
+  </li>
+  <li><b>看截图</b>：法兰/弯头/三通/箭头等图例应正常显示，且阀门仍按 15c 比例缩放（阀门走代码兜底，不走库）。</li>
+</ol>
+
+<div class="danger"><b>最需要盯的风险：库建成了但 SLABEL 渲染空白。</b>
+本机 <code>/MDS/ABA/TAGS/*</code>、<code>/TT/Isometric_ADP/*</code> 的模板大多「存在但空白」，
+说明 SLABEL+TMRF 通道能建、不代表模板几何一定能画出来。若新图里图例消失：
+① 立刻传 <code>symLib=0</code>（或 <code>off/false</code>）重出图，<b>一秒回到原来的 9200 条线段画法</b>；
+② 把 <code>(15g)</code> 那几行日志发我，按 donor 的 member 类型 / 定位失败数调几何通道。</div>
+
+<h3>5. 参数与回滚</h3>
+<table>
+  <tr><th>参数</th><th>缺省</th><th>作用</th></tr>
+  <tr><td><code>symLib</code></td><td><code>1</code></td><td><code>0/off/false</code> = 完全关闭库通道，纯代码画线（15f 行为）</td></tr>
+  <tr><td><code>symLibRebuild</code></td><td><code>0</code></td><td><code>1</code> = 清空既有 SYTM 几何重建（改了图例样式后用）</td></tr>
+  <tr><td><code>op=create_sym_blocks</code></td><td>手动</td><td>不跑出图、单独建库；<code>rebuild=true</code> 默认，失败会给出 15g 诊断</td></tr>
+  <tr><td>DLL 回滚</td><td>—</td><td>用 <code>drawingPDMS.dll.bak_15f_20261110</code> 覆盖安装目录，重启模块</td></tr>
+</table>
+
+<div class="ok"><b>同步状态</b>：本轮只改主工程（唯一编译落点）。沉淀版 <code>D:\repos\pdmsDrawing\src\drawingPDMS\headlessDrawing.cs</code>
+仍停在 14g、缺 14i/14k/14m/14n/14o/14p，<b>本轮未同步</b>——按既有铁律，同步前先补基座，别拿 15g 直接覆盖。</div>
+
+<h2>二、B 怎么做：让 PDMS 原生视图自动出图例</h2>
+
+<p>B 的目标是：不再靠 <code>replace_symbols</code> 后画，而是 <code>UPDATE ALL</code> 时 PDMS 自己按元件类型/CATREF
+把符号生成到视图里。官方叫 <b>2D Symbolic Representation</b>，链路是「Draft 符号模板 → Paragon 元件库链接 → Draft 表示规则 → DESSYM」。
+A 建好的 13 个 SYTM 正好是它的第 1 环。</p>
+
+<h3>1. 完整链路（官方案例 + 本项目 RRSF 实证）</h3>
+<table>
+  <tr><th>阶段</th><th>模块 / 层级</th><th>要设的属性</th><th>说明</th></tr>
+  <tr><td>① 模板</td><td>Draft <code>DEPT &gt; REGI &gt; LIBY &gt; SYLB &gt; SYTM</code></td><td>—</td><td><b>A 已做</b>（13 个模板）</td></tr>
+  <tr><td>② 符号链接</td><td>Paragon <code>CATA &gt; SECT &gt; DRSSET &gt; DRSYLK</code></td><td><code>DrTmpref</code> → SYTM；<code>Criteria</code></td><td>按元件类型/口径挑该用哪个模板；一个 DRSSET 管一组</td></tr>
+  <tr><td>③ 通用部件</td><td>Paragon <code>PRTWLD &gt; PRTELE &gt; GPART</code></td><td><code>Tmpref</code>、<code>DrSSRef</code>（→ DRSSET）</td><td>把符号链接挂到通用部件</td></tr>
+  <tr><td>④ 等级元件</td><td><code>SPWL &gt; SPEC &gt; SELE &gt; SPCO</code></td><td><code>Prtref</code>（→ GPART）、<code>Tmpref</code></td><td>或走 <code>TABGRO &gt; CTABLE &gt; TABITE</code></td></tr>
+  <tr><td>⑤ 设计元件</td><td>Design <code>SITE &gt; ZONE &gt; EQUI</code>（标准设备）</td><td><code>Spref</code> → SPEC</td><td>管道元件靠 <code>CATR/SPREF</code>，规则按此认</td></tr>
+  <tr><td>⑥ 表示规则</td><td>Draft <code>DRWG &gt; SHEE &gt; VIEW &gt; RRUL</code></td><td><code>Styf=Nulref</code>、<code>Omitflag=false</code>、<code>SymbolFlag=true</code>、<code>Criteria</code></td><td><b>一个 2D 符号一条 RRUL</b>；本项目 RRSF 指向 <code>/DRA/PRJ/...</code></td></tr>
+  <tr><td>⑦ 生成</td><td>VIEW 上 <code>Graphics &gt; Update &gt; All</code></td><td>—</td><td>自动建 <code>DSLAYE</code>，其下 <code>DESSYM</code> 每个代表一个 SYTM/TXTM</td></tr>
+  <tr><td>⑧ 微调</td><td><code>DESSYM</code></td><td><code>ADEG / BLNK / XYSCALE / XYPOS</code></td><td>方向、消隐、缩放、位置</td></tr>
+</table>
+
+<h3>2. 官方明确的三条硬限制</h3>
+<ul>
+  <li><b>符号方向不跟随 EQUI 方向</b>——要改 DESSYM 的 ADEG；本项目阀门/弯头方向由管线走向算，仍需代码/规则补。</li>
+  <li><b>DESSYM 不能智能标注</b>（尺寸、GLAB、SLAB 都认不了）→ 官方案例建议用 <b>Local Rules (RULL)</b> 在智能标注完成后再应用 2D 符号。</li>
+  <li><b>没有合法 CATREF / SPREF 的裸元件规则认不出</b>——本项目 14x/15a 已实证大量裸 BRANCH/测点，这部分<b>永远需要代码兜底</b>。</li>
+</ul>
+
+<h3>3. 本项目特有的坑（不是文档上的，是这台机器上踩过的）</h3>
+<ul>
+  <li><b>PRJ / MAS 库拒写</b>：14n/14p 两次实测 <code>/DRA/PRJ/STYL/PIPE/CLINE</code> 的 CLSTYL 属性 <code>IsAttributeSetable=false</code>，
+      14p 才被迫在 WORLD 下自建 <code>LIBY AGT_LIB → RPLB AGT_STYLIB</code> 克隆样式并重指向 RRUL 成员。
+      B 配 RRUL 大概率也要走「自建可写规则库 + 重指向」，不能直接改项目模板库。</li>
+  <li><b>UPDATE ALL 是全局动作</b>：规则 Criteria 写错会全项目渲染空白；必须先建测试库、先 SAVEWORK、先在单张图上验。</li>
+  <li><b>会碰 15f 刚修好的链路</b>：贴线标注依赖 <code>pendStrokes</code>（13n 可见段收集）。B 改了视图生成内容后，
+      要重新确认 <code>(14u) 命中N</code> 与 <code>(15f) 不引出</code> 没被 UPDATE 行为带偏。</li>
+</ul>
+
+<h3>4. 建议的分阶段实施（每阶段带门禁）</h3>
+<table>
+  <tr><th>阶段</th><th>动作</th><th>门禁（不过就停）</th></tr>
+  <tr><td>P0</td><td>备份项目库 + 建测试 DRAFT 库/测试图；确认 DRAFTADMIN 权限</td><td>能在测试库里 <code>UPDATE ALL</code> 且不报错</td></tr>
+  <tr><td>P1</td><td>用 A 的 13 个 SYTM，在 Paragon 建 DRSSET/DRSYLK，逐条填 <code>DrTmpref</code> + Criteria</td><td>13 条 DrTmpref 回读全部指向存在的 SYTM</td></tr>
+  <tr><td>P2</td><td>GPART/SPCO 挂 <code>Tmpref/DrSSRef</code>（只挑有合法 CATREF 的元件类型）</td><td>抽查 10 个 SPCO 回读非空</td></tr>
+  <tr><td>P3</td><td>在<b>自建可写规则库</b>里建 RRUL（SymbolFlag=true），把 VIEW.RRSF 临时切过去，<code>UPDATE ALL</code></td><td>生成 DSLAYE + DESSYM 且截图里符号可见、方向正确</td></tr>
+  <tr><td>P4</td><td>按类型<b>灰度</b>关掉 replace_symbols 的自绘（先法兰→弯头→三通→阀门），无 CATREF 裸元件保留代码兜底</td><td>DXF 里符号数量与元件数对得上，且无重复/无空白</td></tr>
+</table>
+
+<h3>5. 结论与建议</h3>
+<div class="card">
+  <b>B 技术上可行，但它是「改项目库 + 改表示规则」的项目级改造</b>，影响面远超 A：
+  规则配错全项目渲染空白、PRJ/MAS 拒写要绕、DESSYM 不可智能标注、裸元件永远要代码兜底。
+  因此建议顺序：<b>先把 A 跑通并截图确认库符号渲染正常 → 再进 B 的 P0/P1</b>（P0/P1 只加链接、不改视图行为，是可逆的）；
+  P3 往后每步都在测试库做 + SAVEWORK。B 的终点也不是「replace_symbols 删掉」，而是
+  「原生规则负责绝大部分标准元件，代码只兜底裸元件与标注」。<b>本轮未动任何数据库、未配任何 RRUL</b>。
+</div>
+
+<h2>附录 · 证据与出处</h2>
+<ul>
+  <li>09:06:52 <code>op_create_drawing.log</code>「符号模板体检」：<code>/MDS/ABA/TAGS/CIRCLE/2</code>、
+      <code>/TT/DRA/MAS/LABELS/GEN/PIPE/END</code> 存在 <code>type=SYTM</code>，其余 7 个候选缺失（渲染空白）。</li>
+  <li>19:12:34 <code>op_create_drawing.log</code> 14p：<code>LIBY AGT_LIB 已建 → RPLB AGT_STYLIB 已建 → STYL CLINE_SLD 已建</code>，
+      且三处 <code>命名失败(继续,持直接引用)</code>；<code>LStyno 探针 CLINE int=8004 PComs(Solid) int=8001</code>。</li>
+  <li>2026-10-17 <code>op_create_sym_blocks.log</code>：三次 <code>DEPT → LALB CreateLast</code> 全抛「应用程序中的错误」。</li>
+  <li>AVEVA Everything3D 2.1 Draft User Guide：<i>Symbol Templates</i>（SYTM/SYLB/LALB/TMRF/SLAB/SYMB 定义）、
+      <i>Create Label Library</i>（「The Library (LIBY) must be selected … to create a LALB」）、
+      <i>2D Symbolic Representation</i> 培训案例（DRSYLK → GPART → SPCO → EQUI.Spref → RRUL → DESSYM 完整命令链）。
+      文档为 E3D 2.1，PDMS 12.1.SP4 的 DRAFT 同源，属性名仍以本机实机回读为准。</li>
+  <li><code>drawE3D.cs</code> 738–790 / 2541：<code>SLABEL.TMRF</code>、<code>ADEG</code>、<code>FCOLOU</code>、<code>LLEA</code>、
+      <code>at x y</code> 的既有实证通道；<code>Xyscale</code> 三处均为注释（未验证，故 15g 不带缩放的库引用才放行）。</li>
+</ul>
+
+<div class="foot">PDMS大拿 🔧 · 证据优先：返回 ok ≠ 成功，timeout ≠ 失败。A 的实机验收以 (15g) 日志与新截图为准。</div>
+
+</div></body></html>

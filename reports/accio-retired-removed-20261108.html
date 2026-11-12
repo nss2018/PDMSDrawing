@@ -1,0 +1,29 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8">
+<title>ACCIO 旧副本删除凭证</title><style>
+body{background:#f6f7f9;color:#20242b;font:14px/1.65 -apple-system,"Microsoft YaHei",sans-serif;margin:0;padding:32px}
+.wrap{max-width:960px;margin:auto;background:#fff;border:1px solid #e3e6ea;border-radius:10px;padding:28px 32px}
+h1{font-size:22px;margin:0 0 6px}h2{font-size:16px;margin:24px 0 10px;border-left:3px solid #2f6fdb;padding-left:10px}
+.sub{color:#6b7280;font-size:13px}table{border-collapse:collapse;width:100%;margin:10px 0}th,td{border:1px solid #e5e8ec;padding:7px 10px;text-align:left;font-size:13px}th{background:#f2f5f9}
+code{background:#f1f3f6;padding:1px 5px;border-radius:4px;font-size:12px;word-break:break-all}
+.ok{color:#16794a;font-weight:600}.warn{color:#b45309;font-weight:600}.bad{color:#b42318;font-weight:600}
+ul{margin:8px 0;padding-left:22px}li{margin:4px 0}.box{background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;padding:12px 16px;margin:14px 0}
+</style></head><body><div class="wrap">
+<h1>ACCIO 旧副本删除凭证</h1>
+<div class="sub">2026-11-08 11:21 ｜ 经聂工两次确认 ｜ <b>未做备份</b> ｜ 6 个目录 / 44 文件</div>
+<div class="box"><b>⚠️ D 盘是 FAT32（U 盘），没有 $RECYCLE.BIN。</b>D:\skill 下 3 个目录为永久删除、<span class="bad">不可恢复</span>；C 盘 3 个目录进入 Windows 回收站、<span class="ok">可还原</span>。</div>
+<h2>删除清单</h2><table><tr><th>路径</th><th>文件数</th><th>方式</th><th>可恢复性</th></tr><tr><td><code>D:\skill\pdms-dialog-autoclose</code></td><td>1</td><td>永久删除</td><td>不可恢复</td></tr><tr><td><code>D:\skill\pdms-pml-course</code></td><td>20</td><td>永久删除</td><td>不可恢复</td></tr><tr><td><code>D:\skill\pdms-bridge-probe</code></td><td>1</td><td>永久删除</td><td>不可恢复</td></tr><tr><td><code>C:\Users\Nie\.accio\accounts\1796501114\skills\pdms-dialog-autoclose</code></td><td>1</td><td>回收站</td><td>可还原</td></tr><tr><td><code>C:\Users\Nie\.accio\accounts\1796501114\skills\pdms-pml-course</code></td><td>20</td><td>回收站</td><td>可还原</td></tr><tr><td><code>C:\Users\Nie\.accio\accounts\1796501114\skills\pdms-bridge-probe</code></td><td>1</td><td>回收站</td><td>可还原</td></tr></table>
+<h2>执行与验证</h2><ul>
+<li>Win32 <code>SHFileOperationW</code>：C 盘带 <code>FOF_ALLOWUNDO</code>，D 盘不带；6 次调用 <code>rc=0 / aborted=False</code>，目录全部不存在。</li>
+<li><span class="ok">canonical 技能完好</span>：5 个目标里 <code>pdms-dialog</code> / <code>pdms-bridge</code> / <code>pdms-pml</code>、以及 <code>auto-close-watchdog.md</code> / <code>probe-and-macro-batching.md</code> 逐项检查全 True。</li>
+<li>同步器复跑预演：<code>new=0 overwrite=0 same=911 protected=4</code>，删旧副本没有破坏幂等性。</li>
+<li>删除后各目标技能数：D:\skill 63 ｜ 1796501114 56 ｜ 7100633559 27 ｜ 1794603983 41 ｜ 7099707696 26。</li>
+</ul>
+<h2>遗留项（未擅自改动）</h2><ul>
+<li><b>文字引用</b>：约 24 个 .md 仍写着旧技能名。多数是 canonical 技能里刻意保留的「原 xxx 已归档」溯源说明；实用引用集中在 <code>pdms-run-macro/SKILL.md</code>（ACCIO 增强版）、<code>pdms-bridge-port-binding/SKILL.md</code>、<code>pdms-bridge-identifier-lint/SKILL.md</code>，现在指向不存在的技能，但不影响加载。要改说一声。</li>
+<li><b>skills_config.json</b>：account-1796501114 里仍有 <code>pdms-dialog-autoclose</code> / <code>pdms-pml-course</code> 的 enabled 记录。客户端自托管，<b>禁止手改</b>；重启 ACCIO 让它自己刷新，或走客户端技能管理操作。</li>
+</ul>
+<h2>恢复方式</h2><ul>
+<li>C 盘 3 个：打开 Windows 回收站，按目录名还原到 <code>C:\Users\Nie\.accio\accounts\1796501114\skills\</code>。</li>
+<li>D 盘 3 个：<span class="bad">无回收站、无备份，无法还原</span>；如需可再从 WorkBuddy 侧 <code>~/.workbuddy/skills</code> 重新同步 canonical 版。</li>
+</ul>
+</div></body></html>

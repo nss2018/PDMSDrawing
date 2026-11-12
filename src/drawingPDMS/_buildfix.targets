@@ -1,0 +1,9 @@
+<Project>
+  <!-- 临时构建修正：绕过 dotnet 无法运行 ResGen.exe 的环境限制，
+       使 Csc 能真正编译 C# 源码以验证 0 错误。
+       此文件不提交、不随工程分发。 -->
+  <ItemGroup>
+    <EmbeddedResource Remove="@(EmbeddedResource)" />
+  </ItemGroup>
+  <Target Name="GenerateResource" />
+</Project>

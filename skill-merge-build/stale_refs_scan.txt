@@ -1,0 +1,186 @@
+==============================================================================
+ROOT WB         C:\Users\Nie\.workbuddy\skills   files=9 hits=17
+  - pdms-bridge/SKILL.md  (4)
+      L28   [pdms-bridge-probe       ] ## 会话探活与防阻塞（合并自 pdms-bridge-probe）
+      L30   [pdms-bridge-probe       ] > 触发：`Get-NetTCPConnection` 返回空 / 异常、端口扫不出、长宏占死会话、`RunInPdms failed`、结果文件只有 3 字节 BOM。完整 4 步工作流、Fallback 与 Pitfalls 见 `references/probe-and-macro-batch
+      L200  [pdms-bridge-probe       ] - `references/probe-and-macro-batching.md`：**会话探活 / 端口验证 / 长宏分步下发 / 结果文件校验 / 止损线**（合并自原 `pdms-bridge-probe`）。
+      L211  [pdms-bridge-probe       ] - v2.0.0（2026-11-08）：并入 `pdms-bridge-probe`（Socket 探活 / 分步下发 / BOM 校验 / 止损线），新增「会话探活与防阻塞」章节；旧技能名只作溯源。
+  - pdms-bridge/references/probe-and-macro-batching.md  (2)
+      L1    [pdms-bridge-probe       ] # 会话探活 / 端口验证 / 长宏防阻塞（合并自 pdms-bridge-probe）
+      L3    [pdms-bridge-probe       ] > 来源：原技能 `pdms-bridge-probe`（2026-11-08 合并入 `pdms-bridge`，原目录已归档到 `D:\repos\pdmsDrawing\skill-archive\pdms-bridge-probe-20261108`）。本文保留全部工作流、Fallback、
+  - pdms-dialog/SKILL.md  (3)
+      L18   [pdms-dialog-autoclose   ] > **v2.0.0（2026-11-08）**：并入原 `pdms-dialog-autoclose`（常驻看门狗两实现），原技能目录已归档到 `D:\repos\pdmsDrawing\skill-archive\pdms-dialog-autoclose-20261108`。合并后一个技能覆盖
+      L96   [pdms-dialog-autoclose   ] | `references/auto-close-watchdog.md` | 常驻看门狗两实现 + 桥接集成 + 本机实体路径 | 原 `pdms-dialog-autoclose` |
+      L101  [pdms-dialog-autoclose   ] - v2.0.0（2026-11-08）：并入 `pdms-dialog-autoclose`，加两条路由与配套资源表；旧技能名只作溯源，不再作为独立技能引用。
+  - pdms-dialog/references/auto-close-watchdog.md  (2)
+      L1    [pdms-dialog-autoclose   ] # 常驻看门狗：自动关闭 PDMS 弹窗（合并自 pdms-dialog-autoclose）
+      L3    [pdms-dialog-autoclose   ] > 来源：原技能 `pdms-dialog-autoclose`（2026-11-08 合并入 `pdms-dialog`，原目录已归档到 `D:\repos\pdmsDrawing\skill-archive\pdms-dialog-autoclose-20261108`）。本文保留其全部实现细节
+  - pdms-expert/references/discipline.md  (1)
+      L9    [pdms-pml-course         ] | Z-03 | 基本操作先学习（"基本操作先学习一下"）。查"某条语法标准写法"走 `pdms-pml`（课程 + 避坑已合并，原 `pdms-pml-course` 已归档）/ 本正本，**不准瞎试**。 |
+  - pdms-expert/references/postmortems.md  (1)
+      L118  [pdms-dialog-autoclose   ] 7. ~~`dialog_watcher.py` / `ModalClose.exe` 本机无实体~~ **判错了（同源事故）**：两者都在 D 盘——`D:\repos\pdmsDrawing\bridge\dialog_watcher.py`、`D:\repos\bridge\ModalClos
+  - pdms-pml/SKILL.md  (2)
+      L10   [pdms-pml-course         ] > v2.3.0（2026-11-08）：清理旧副本 `pdms-pml-course`——它是 v2.1.0 合并**之前**的课程版，3 处 reference 差异（外链改写 / `.pmlobj` 说明）早已并入本技能，内容无缺失；原目录归档到 `D:\repos\pdmsDrawing\s
+      L14   [pdms-pml-course         ] > v2.1.0：由原 `pdms-pml`（实战避坑）与 `pdms-pml-course`（课程式教程）合并而成，一个技能覆盖两半：
+  - pdms-run-macro/SKILL.md  (1)
+      L141  [pdms-pml-course         ] - `pdms-pml`（一站式：课程式标准语法 + 实战避坑全集；原 `pdms-pml-course` 已并入并归档，按 `references/` 模块路由查主题）。
+  - skill-merge-pack/SKILL.md  (1)
+      L33   [pdms-pml-course         ] ## 变体：一侧其实是「历史残留副本」（2026-11-08 pdms-pml-course 实战）
+==============================================================================
+ROOT D-skill    D:\skill   files=12 hits=22
+  - pdms-pml/SKILL.md  (2)
+      L10   [pdms-pml-course         ] > v2.3.0（2026-11-08）：清理旧副本 `pdms-pml-course`——它是 v2.1.0 合并**之前**的课程版，3 处 reference 差异（外链改写 / `.pmlobj` 说明）早已并入本技能，内容无缺失；原目录归档到 `D:\repos\pdmsDrawing\s
+      L14   [pdms-pml-course         ] > v2.1.0：由原 `pdms-pml`（实战避坑）与 `pdms-pml-course`（课程式教程）合并而成，一个技能覆盖两半：
+  - pdms-run-macro/SKILL.md  (2)
+      L170  [pdms-pml-course         ] - `pdms-pml-course`（PML 标准语法课程：宏与变量、元素导航、控制流、文件处理）。
+      L173  [pdms-dialog-autoclose   ] - `pdms-dialog-autoclose`（PDMS 弹窗自动关闭：headless 跑宏时弹窗挂住命令线程的兜底方案）。
+  - pdms-run-macro/SKILL.workbuddy.md  (1)
+      L141  [pdms-pml-course         ] - `pdms-pml`（一站式：课程式标准语法 + 实战避坑全集；原 `pdms-pml-course` 已并入并归档，按 `references/` 模块路由查主题）。
+  - pdms-bridge-identifier-lint/SKILL.md  (2)
+      L95   [pdms-pml-course         ] 上一条推论**作废**。真正原因是 `pdms-pml-course` 硬约束 6：**`handle ANY` 只保护紧邻它【前面】的那一条语句**，我一直把它写在语句【前面】当 try 用 —— 等于完全没保护，任何一条取值失败就让整宏致命中止，表现为"标记为空 / 只有 BOM"。
+      L97   [pdms-pml-course         ] **通道上读属性的唯一正确姿势（`pdms-pml-course` references/element-navigation.md + assets/examples/locate_demo.pml 原文）：**
+  - pdms-bridge-port-binding/SKILL.md  (1)
+      L19   [pdms-dialog-autoclose   ] 5. **执行轻量级探针验证**：向确认已绑定端口的 `{target_port}` 发送极简宏（如 `writefile` 写入标记），并监控结果文件是否落盘。若仍失败，检查是否存在模态错误框冻结线程（见 `pdms-dialog-autoclose`）。
+  - pdms-expert/references/discipline.md  (1)
+      L9    [pdms-pml-course         ] | Z-03 | 基本操作先学习（"基本操作先学习一下"）。查"某条语法标准写法"走 `pdms-pml`（课程 + 避坑已合并，原 `pdms-pml-course` 已归档）/ 本正本，**不准瞎试**。 |
+  - pdms-expert/references/postmortems.md  (1)
+      L118  [pdms-dialog-autoclose   ] 7. ~~`dialog_watcher.py` / `ModalClose.exe` 本机无实体~~ **判错了（同源事故）**：两者都在 D 盘——`D:\repos\pdmsDrawing\bridge\dialog_watcher.py`、`D:\repos\bridge\ModalClos
+  - pdms-bridge/SKILL.md  (4)
+      L28   [pdms-bridge-probe       ] ## 会话探活与防阻塞（合并自 pdms-bridge-probe）
+      L30   [pdms-bridge-probe       ] > 触发：`Get-NetTCPConnection` 返回空 / 异常、端口扫不出、长宏占死会话、`RunInPdms failed`、结果文件只有 3 字节 BOM。完整 4 步工作流、Fallback 与 Pitfalls 见 `references/probe-and-macro-batch
+      L200  [pdms-bridge-probe       ] - `references/probe-and-macro-batching.md`：**会话探活 / 端口验证 / 长宏分步下发 / 结果文件校验 / 止损线**（合并自原 `pdms-bridge-probe`）。
+      L211  [pdms-bridge-probe       ] - v2.0.0（2026-11-08）：并入 `pdms-bridge-probe`（Socket 探活 / 分步下发 / BOM 校验 / 止损线），新增「会话探活与防阻塞」章节；旧技能名只作溯源。
+  - pdms-bridge/references/probe-and-macro-batching.md  (2)
+      L1    [pdms-bridge-probe       ] # 会话探活 / 端口验证 / 长宏防阻塞（合并自 pdms-bridge-probe）
+      L3    [pdms-bridge-probe       ] > 来源：原技能 `pdms-bridge-probe`（2026-11-08 合并入 `pdms-bridge`，原目录已归档到 `D:\repos\pdmsDrawing\skill-archive\pdms-bridge-probe-20261108`）。本文保留全部工作流、Fallback、
+  - pdms-dialog/SKILL.md  (3)
+      L18   [pdms-dialog-autoclose   ] > **v2.0.0（2026-11-08）**：并入原 `pdms-dialog-autoclose`（常驻看门狗两实现），原技能目录已归档到 `D:\repos\pdmsDrawing\skill-archive\pdms-dialog-autoclose-20261108`。合并后一个技能覆盖
+      L96   [pdms-dialog-autoclose   ] | `references/auto-close-watchdog.md` | 常驻看门狗两实现 + 桥接集成 + 本机实体路径 | 原 `pdms-dialog-autoclose` |
+      L101  [pdms-dialog-autoclose   ] - v2.0.0（2026-11-08）：并入 `pdms-dialog-autoclose`，加两条路由与配套资源表；旧技能名只作溯源，不再作为独立技能引用。
+  - pdms-dialog/references/auto-close-watchdog.md  (2)
+      L1    [pdms-dialog-autoclose   ] # 常驻看门狗：自动关闭 PDMS 弹窗（合并自 pdms-dialog-autoclose）
+      L3    [pdms-dialog-autoclose   ] > 来源：原技能 `pdms-dialog-autoclose`（2026-11-08 合并入 `pdms-dialog`，原目录已归档到 `D:\repos\pdmsDrawing\skill-archive\pdms-dialog-autoclose-20261108`）。本文保留其全部实现细节
+  - skill-merge-pack/SKILL.md  (1)
+      L33   [pdms-pml-course         ] ## 变体：一侧其实是「历史残留副本」（2026-11-08 pdms-pml-course 实战）
+==============================================================================
+ROOT acc-1796501114 C:\Users\Nie\.accio\accounts\1796501114\skills   files=12 hits=22
+  - pdms-bridge/SKILL.md  (4)
+      L28   [pdms-bridge-probe       ] ## 会话探活与防阻塞（合并自 pdms-bridge-probe）
+      L30   [pdms-bridge-probe       ] > 触发：`Get-NetTCPConnection` 返回空 / 异常、端口扫不出、长宏占死会话、`RunInPdms failed`、结果文件只有 3 字节 BOM。完整 4 步工作流、Fallback 与 Pitfalls 见 `references/probe-and-macro-batch
+      L200  [pdms-bridge-probe       ] - `references/probe-and-macro-batching.md`：**会话探活 / 端口验证 / 长宏分步下发 / 结果文件校验 / 止损线**（合并自原 `pdms-bridge-probe`）。
+      L211  [pdms-bridge-probe       ] - v2.0.0（2026-11-08）：并入 `pdms-bridge-probe`（Socket 探活 / 分步下发 / BOM 校验 / 止损线），新增「会话探活与防阻塞」章节；旧技能名只作溯源。
+  - pdms-bridge/references/probe-and-macro-batching.md  (2)
+      L1    [pdms-bridge-probe       ] # 会话探活 / 端口验证 / 长宏防阻塞（合并自 pdms-bridge-probe）
+      L3    [pdms-bridge-probe       ] > 来源：原技能 `pdms-bridge-probe`（2026-11-08 合并入 `pdms-bridge`，原目录已归档到 `D:\repos\pdmsDrawing\skill-archive\pdms-bridge-probe-20261108`）。本文保留全部工作流、Fallback、
+  - pdms-bridge-identifier-lint/SKILL.md  (2)
+      L95   [pdms-pml-course         ] 上一条推论**作废**。真正原因是 `pdms-pml-course` 硬约束 6：**`handle ANY` 只保护紧邻它【前面】的那一条语句**，我一直把它写在语句【前面】当 try 用 —— 等于完全没保护，任何一条取值失败就让整宏致命中止，表现为"标记为空 / 只有 BOM"。
+      L97   [pdms-pml-course         ] **通道上读属性的唯一正确姿势（`pdms-pml-course` references/element-navigation.md + assets/examples/locate_demo.pml 原文）：**
+  - pdms-bridge-port-binding/SKILL.md  (1)
+      L19   [pdms-dialog-autoclose   ] 5. **执行轻量级探针验证**：向确认已绑定端口的 `{target_port}` 发送极简宏（如 `writefile` 写入标记），并监控结果文件是否落盘。若仍失败，检查是否存在模态错误框冻结线程（见 `pdms-dialog-autoclose`）。
+  - pdms-dialog/SKILL.md  (3)
+      L18   [pdms-dialog-autoclose   ] > **v2.0.0（2026-11-08）**：并入原 `pdms-dialog-autoclose`（常驻看门狗两实现），原技能目录已归档到 `D:\repos\pdmsDrawing\skill-archive\pdms-dialog-autoclose-20261108`。合并后一个技能覆盖
+      L96   [pdms-dialog-autoclose   ] | `references/auto-close-watchdog.md` | 常驻看门狗两实现 + 桥接集成 + 本机实体路径 | 原 `pdms-dialog-autoclose` |
+      L101  [pdms-dialog-autoclose   ] - v2.0.0（2026-11-08）：并入 `pdms-dialog-autoclose`，加两条路由与配套资源表；旧技能名只作溯源，不再作为独立技能引用。
+  - pdms-dialog/references/auto-close-watchdog.md  (2)
+      L1    [pdms-dialog-autoclose   ] # 常驻看门狗：自动关闭 PDMS 弹窗（合并自 pdms-dialog-autoclose）
+      L3    [pdms-dialog-autoclose   ] > 来源：原技能 `pdms-dialog-autoclose`（2026-11-08 合并入 `pdms-dialog`，原目录已归档到 `D:\repos\pdmsDrawing\skill-archive\pdms-dialog-autoclose-20261108`）。本文保留其全部实现细节
+  - pdms-expert/references/discipline.md  (1)
+      L9    [pdms-pml-course         ] | Z-03 | 基本操作先学习（"基本操作先学习一下"）。查"某条语法标准写法"走 `pdms-pml`（课程 + 避坑已合并，原 `pdms-pml-course` 已归档）/ 本正本，**不准瞎试**。 |
+  - pdms-expert/references/postmortems.md  (1)
+      L118  [pdms-dialog-autoclose   ] 7. ~~`dialog_watcher.py` / `ModalClose.exe` 本机无实体~~ **判错了（同源事故）**：两者都在 D 盘——`D:\repos\pdmsDrawing\bridge\dialog_watcher.py`、`D:\repos\bridge\ModalClos
+  - pdms-pml/SKILL.md  (2)
+      L10   [pdms-pml-course         ] > v2.3.0（2026-11-08）：清理旧副本 `pdms-pml-course`——它是 v2.1.0 合并**之前**的课程版，3 处 reference 差异（外链改写 / `.pmlobj` 说明）早已并入本技能，内容无缺失；原目录归档到 `D:\repos\pdmsDrawing\s
+      L14   [pdms-pml-course         ] > v2.1.0：由原 `pdms-pml`（实战避坑）与 `pdms-pml-course`（课程式教程）合并而成，一个技能覆盖两半：
+  - pdms-run-macro/SKILL.md  (2)
+      L170  [pdms-pml-course         ] - `pdms-pml-course`（PML 标准语法课程：宏与变量、元素导航、控制流、文件处理）。
+      L173  [pdms-dialog-autoclose   ] - `pdms-dialog-autoclose`（PDMS 弹窗自动关闭：headless 跑宏时弹窗挂住命令线程的兜底方案）。
+  - pdms-run-macro/SKILL.workbuddy.md  (1)
+      L141  [pdms-pml-course         ] - `pdms-pml`（一站式：课程式标准语法 + 实战避坑全集；原 `pdms-pml-course` 已并入并归档，按 `references/` 模块路由查主题）。
+  - skill-merge-pack/SKILL.md  (1)
+      L33   [pdms-pml-course         ] ## 变体：一侧其实是「历史残留副本」（2026-11-08 pdms-pml-course 实战）
+==============================================================================
+ROOT acc-7100633559 C:\Users\Nie\.accio\accounts\7100633559\skills   files=9 hits=17
+  - pdms-bridge/SKILL.md  (4)
+      L28   [pdms-bridge-probe       ] ## 会话探活与防阻塞（合并自 pdms-bridge-probe）
+      L30   [pdms-bridge-probe       ] > 触发：`Get-NetTCPConnection` 返回空 / 异常、端口扫不出、长宏占死会话、`RunInPdms failed`、结果文件只有 3 字节 BOM。完整 4 步工作流、Fallback 与 Pitfalls 见 `references/probe-and-macro-batch
+      L200  [pdms-bridge-probe       ] - `references/probe-and-macro-batching.md`：**会话探活 / 端口验证 / 长宏分步下发 / 结果文件校验 / 止损线**（合并自原 `pdms-bridge-probe`）。
+      L211  [pdms-bridge-probe       ] - v2.0.0（2026-11-08）：并入 `pdms-bridge-probe`（Socket 探活 / 分步下发 / BOM 校验 / 止损线），新增「会话探活与防阻塞」章节；旧技能名只作溯源。
+  - pdms-bridge/references/probe-and-macro-batching.md  (2)
+      L1    [pdms-bridge-probe       ] # 会话探活 / 端口验证 / 长宏防阻塞（合并自 pdms-bridge-probe）
+      L3    [pdms-bridge-probe       ] > 来源：原技能 `pdms-bridge-probe`（2026-11-08 合并入 `pdms-bridge`，原目录已归档到 `D:\repos\pdmsDrawing\skill-archive\pdms-bridge-probe-20261108`）。本文保留全部工作流、Fallback、
+  - pdms-dialog/SKILL.md  (3)
+      L18   [pdms-dialog-autoclose   ] > **v2.0.0（2026-11-08）**：并入原 `pdms-dialog-autoclose`（常驻看门狗两实现），原技能目录已归档到 `D:\repos\pdmsDrawing\skill-archive\pdms-dialog-autoclose-20261108`。合并后一个技能覆盖
+      L96   [pdms-dialog-autoclose   ] | `references/auto-close-watchdog.md` | 常驻看门狗两实现 + 桥接集成 + 本机实体路径 | 原 `pdms-dialog-autoclose` |
+      L101  [pdms-dialog-autoclose   ] - v2.0.0（2026-11-08）：并入 `pdms-dialog-autoclose`，加两条路由与配套资源表；旧技能名只作溯源，不再作为独立技能引用。
+  - pdms-dialog/references/auto-close-watchdog.md  (2)
+      L1    [pdms-dialog-autoclose   ] # 常驻看门狗：自动关闭 PDMS 弹窗（合并自 pdms-dialog-autoclose）
+      L3    [pdms-dialog-autoclose   ] > 来源：原技能 `pdms-dialog-autoclose`（2026-11-08 合并入 `pdms-dialog`，原目录已归档到 `D:\repos\pdmsDrawing\skill-archive\pdms-dialog-autoclose-20261108`）。本文保留其全部实现细节
+  - pdms-expert/references/discipline.md  (1)
+      L9    [pdms-pml-course         ] | Z-03 | 基本操作先学习（"基本操作先学习一下"）。查"某条语法标准写法"走 `pdms-pml`（课程 + 避坑已合并，原 `pdms-pml-course` 已归档）/ 本正本，**不准瞎试**。 |
+  - pdms-expert/references/postmortems.md  (1)
+      L118  [pdms-dialog-autoclose   ] 7. ~~`dialog_watcher.py` / `ModalClose.exe` 本机无实体~~ **判错了（同源事故）**：两者都在 D 盘——`D:\repos\pdmsDrawing\bridge\dialog_watcher.py`、`D:\repos\bridge\ModalClos
+  - pdms-pml/SKILL.md  (2)
+      L10   [pdms-pml-course         ] > v2.3.0（2026-11-08）：清理旧副本 `pdms-pml-course`——它是 v2.1.0 合并**之前**的课程版，3 处 reference 差异（外链改写 / `.pmlobj` 说明）早已并入本技能，内容无缺失；原目录归档到 `D:\repos\pdmsDrawing\s
+      L14   [pdms-pml-course         ] > v2.1.0：由原 `pdms-pml`（实战避坑）与 `pdms-pml-course`（课程式教程）合并而成，一个技能覆盖两半：
+  - pdms-run-macro/SKILL.md  (1)
+      L141  [pdms-pml-course         ] - `pdms-pml`（一站式：课程式标准语法 + 实战避坑全集；原 `pdms-pml-course` 已并入并归档，按 `references/` 模块路由查主题）。
+  - skill-merge-pack/SKILL.md  (1)
+      L33   [pdms-pml-course         ] ## 变体：一侧其实是「历史残留副本」（2026-11-08 pdms-pml-course 实战）
+==============================================================================
+ROOT acc-1794603983 C:\Users\Nie\.accio\accounts\1794603983\skills   files=9 hits=17
+  - pdms-bridge/SKILL.md  (4)
+      L28   [pdms-bridge-probe       ] ## 会话探活与防阻塞（合并自 pdms-bridge-probe）
+      L30   [pdms-bridge-probe       ] > 触发：`Get-NetTCPConnection` 返回空 / 异常、端口扫不出、长宏占死会话、`RunInPdms failed`、结果文件只有 3 字节 BOM。完整 4 步工作流、Fallback 与 Pitfalls 见 `references/probe-and-macro-batch
+      L200  [pdms-bridge-probe       ] - `references/probe-and-macro-batching.md`：**会话探活 / 端口验证 / 长宏分步下发 / 结果文件校验 / 止损线**（合并自原 `pdms-bridge-probe`）。
+      L211  [pdms-bridge-probe       ] - v2.0.0（2026-11-08）：并入 `pdms-bridge-probe`（Socket 探活 / 分步下发 / BOM 校验 / 止损线），新增「会话探活与防阻塞」章节；旧技能名只作溯源。
+  - pdms-bridge/references/probe-and-macro-batching.md  (2)
+      L1    [pdms-bridge-probe       ] # 会话探活 / 端口验证 / 长宏防阻塞（合并自 pdms-bridge-probe）
+      L3    [pdms-bridge-probe       ] > 来源：原技能 `pdms-bridge-probe`（2026-11-08 合并入 `pdms-bridge`，原目录已归档到 `D:\repos\pdmsDrawing\skill-archive\pdms-bridge-probe-20261108`）。本文保留全部工作流、Fallback、
+  - pdms-dialog/SKILL.md  (3)
+      L18   [pdms-dialog-autoclose   ] > **v2.0.0（2026-11-08）**：并入原 `pdms-dialog-autoclose`（常驻看门狗两实现），原技能目录已归档到 `D:\repos\pdmsDrawing\skill-archive\pdms-dialog-autoclose-20261108`。合并后一个技能覆盖
+      L96   [pdms-dialog-autoclose   ] | `references/auto-close-watchdog.md` | 常驻看门狗两实现 + 桥接集成 + 本机实体路径 | 原 `pdms-dialog-autoclose` |
+      L101  [pdms-dialog-autoclose   ] - v2.0.0（2026-11-08）：并入 `pdms-dialog-autoclose`，加两条路由与配套资源表；旧技能名只作溯源，不再作为独立技能引用。
+  - pdms-dialog/references/auto-close-watchdog.md  (2)
+      L1    [pdms-dialog-autoclose   ] # 常驻看门狗：自动关闭 PDMS 弹窗（合并自 pdms-dialog-autoclose）
+      L3    [pdms-dialog-autoclose   ] > 来源：原技能 `pdms-dialog-autoclose`（2026-11-08 合并入 `pdms-dialog`，原目录已归档到 `D:\repos\pdmsDrawing\skill-archive\pdms-dialog-autoclose-20261108`）。本文保留其全部实现细节
+  - pdms-expert/references/discipline.md  (1)
+      L9    [pdms-pml-course         ] | Z-03 | 基本操作先学习（"基本操作先学习一下"）。查"某条语法标准写法"走 `pdms-pml`（课程 + 避坑已合并，原 `pdms-pml-course` 已归档）/ 本正本，**不准瞎试**。 |
+  - pdms-expert/references/postmortems.md  (1)
+      L118  [pdms-dialog-autoclose   ] 7. ~~`dialog_watcher.py` / `ModalClose.exe` 本机无实体~~ **判错了（同源事故）**：两者都在 D 盘——`D:\repos\pdmsDrawing\bridge\dialog_watcher.py`、`D:\repos\bridge\ModalClos
+  - pdms-pml/SKILL.md  (2)
+      L10   [pdms-pml-course         ] > v2.3.0（2026-11-08）：清理旧副本 `pdms-pml-course`——它是 v2.1.0 合并**之前**的课程版，3 处 reference 差异（外链改写 / `.pmlobj` 说明）早已并入本技能，内容无缺失；原目录归档到 `D:\repos\pdmsDrawing\s
+      L14   [pdms-pml-course         ] > v2.1.0：由原 `pdms-pml`（实战避坑）与 `pdms-pml-course`（课程式教程）合并而成，一个技能覆盖两半：
+  - pdms-run-macro/SKILL.md  (1)
+      L141  [pdms-pml-course         ] - `pdms-pml`（一站式：课程式标准语法 + 实战避坑全集；原 `pdms-pml-course` 已并入并归档，按 `references/` 模块路由查主题）。
+  - skill-merge-pack/SKILL.md  (1)
+      L33   [pdms-pml-course         ] ## 变体：一侧其实是「历史残留副本」（2026-11-08 pdms-pml-course 实战）
+==============================================================================
+ROOT acc-7099707696 C:\Users\Nie\.accio\accounts\7099707696\skills   files=9 hits=17
+  - pdms-bridge/SKILL.md  (4)
+      L28   [pdms-bridge-probe       ] ## 会话探活与防阻塞（合并自 pdms-bridge-probe）
+      L30   [pdms-bridge-probe       ] > 触发：`Get-NetTCPConnection` 返回空 / 异常、端口扫不出、长宏占死会话、`RunInPdms failed`、结果文件只有 3 字节 BOM。完整 4 步工作流、Fallback 与 Pitfalls 见 `references/probe-and-macro-batch
+      L200  [pdms-bridge-probe       ] - `references/probe-and-macro-batching.md`：**会话探活 / 端口验证 / 长宏分步下发 / 结果文件校验 / 止损线**（合并自原 `pdms-bridge-probe`）。
+      L211  [pdms-bridge-probe       ] - v2.0.0（2026-11-08）：并入 `pdms-bridge-probe`（Socket 探活 / 分步下发 / BOM 校验 / 止损线），新增「会话探活与防阻塞」章节；旧技能名只作溯源。
+  - pdms-bridge/references/probe-and-macro-batching.md  (2)
+      L1    [pdms-bridge-probe       ] # 会话探活 / 端口验证 / 长宏防阻塞（合并自 pdms-bridge-probe）
+      L3    [pdms-bridge-probe       ] > 来源：原技能 `pdms-bridge-probe`（2026-11-08 合并入 `pdms-bridge`，原目录已归档到 `D:\repos\pdmsDrawing\skill-archive\pdms-bridge-probe-20261108`）。本文保留全部工作流、Fallback、
+  - pdms-dialog/SKILL.md  (3)
+      L18   [pdms-dialog-autoclose   ] > **v2.0.0（2026-11-08）**：并入原 `pdms-dialog-autoclose`（常驻看门狗两实现），原技能目录已归档到 `D:\repos\pdmsDrawing\skill-archive\pdms-dialog-autoclose-20261108`。合并后一个技能覆盖
+      L96   [pdms-dialog-autoclose   ] | `references/auto-close-watchdog.md` | 常驻看门狗两实现 + 桥接集成 + 本机实体路径 | 原 `pdms-dialog-autoclose` |
+      L101  [pdms-dialog-autoclose   ] - v2.0.0（2026-11-08）：并入 `pdms-dialog-autoclose`，加两条路由与配套资源表；旧技能名只作溯源，不再作为独立技能引用。
+  - pdms-dialog/references/auto-close-watchdog.md  (2)
+      L1    [pdms-dialog-autoclose   ] # 常驻看门狗：自动关闭 PDMS 弹窗（合并自 pdms-dialog-autoclose）
+      L3    [pdms-dialog-autoclose   ] > 来源：原技能 `pdms-dialog-autoclose`（2026-11-08 合并入 `pdms-dialog`，原目录已归档到 `D:\repos\pdmsDrawing\skill-archive\pdms-dialog-autoclose-20261108`）。本文保留其全部实现细节
+  - pdms-expert/references/discipline.md  (1)
+      L9    [pdms-pml-course         ] | Z-03 | 基本操作先学习（"基本操作先学习一下"）。查"某条语法标准写法"走 `pdms-pml`（课程 + 避坑已合并，原 `pdms-pml-course` 已归档）/ 本正本，**不准瞎试**。 |
+  - pdms-expert/references/postmortems.md  (1)
+      L118  [pdms-dialog-autoclose   ] 7. ~~`dialog_watcher.py` / `ModalClose.exe` 本机无实体~~ **判错了（同源事故）**：两者都在 D 盘——`D:\repos\pdmsDrawing\bridge\dialog_watcher.py`、`D:\repos\bridge\ModalClos
+  - pdms-pml/SKILL.md  (2)
+      L10   [pdms-pml-course         ] > v2.3.0（2026-11-08）：清理旧副本 `pdms-pml-course`——它是 v2.1.0 合并**之前**的课程版，3 处 reference 差异（外链改写 / `.pmlobj` 说明）早已并入本技能，内容无缺失；原目录归档到 `D:\repos\pdmsDrawing\s
+      L14   [pdms-pml-course         ] > v2.1.0：由原 `pdms-pml`（实战避坑）与 `pdms-pml-course`（课程式教程）合并而成，一个技能覆盖两半：
+  - pdms-run-macro/SKILL.md  (1)
+      L141  [pdms-pml-course         ] - `pdms-pml`（一站式：课程式标准语法 + 实战避坑全集；原 `pdms-pml-course` 已并入并归档，按 `references/` 模块路由查主题）。
+  - skill-merge-pack/SKILL.md  (1)
+      L33   [pdms-pml-course         ] ## 变体：一侧其实是「历史残留副本」（2026-11-08 pdms-pml-course 实战）
+==============================================================================
+TOTAL files=60 hits=112

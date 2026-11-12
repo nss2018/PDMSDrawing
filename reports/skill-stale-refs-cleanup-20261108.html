@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>旧技能名 .md 全量清洗 · 2026-11-08</title>
+<style>
+  :root{
+    --bg:#f6f7f9; --card:#ffffff; --ink:#1f2937; --muted:#6b7280;
+    --line:#e5e7eb; --accent:#2563eb; --ok:#15803d; --okbg:#ecfdf3;
+    --warn:#b45309; --warnbg:#fffbeb; --code:#f3f4f6;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+       font:15px/1.7 -apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",sans-serif;}
+  .wrap{max-width:1080px;margin:0 auto;padding:36px 24px 64px}
+  header{border-bottom:1px solid var(--line);padding-bottom:22px;margin-bottom:28px}
+  h1{font-size:27px;margin:0 0 8px;font-weight:700;letter-spacing:.2px}
+  .sub{color:var(--muted);font-size:14px}
+  .badge{display:inline-block;background:var(--okbg);color:var(--ok);border:1px solid #bbf7d0;
+         border-radius:999px;padding:3px 12px;font-size:13px;font-weight:600;margin-left:8px}
+  h2{font-size:19px;margin:34px 0 14px;padding-left:11px;border-left:4px solid var(--accent)}
+  h3{font-size:15px;margin:22px 0 10px;color:var(--muted);font-weight:600}
+  .cards{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin:22px 0}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 14px;text-align:center}
+  .card b{display:block;font-size:26px;line-height:1.2;color:var(--accent);font-weight:700}
+  .card span{font-size:12px;color:var(--muted)}
+  .box{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px 20px;margin:14px 0}
+  table{width:100%;border-collapse:collapse;background:var(--card);font-size:13.5px}
+  th,td{border:1px solid var(--line);padding:9px 11px;text-align:left;vertical-align:top}
+  th{background:#fafafa;font-weight:600;color:var(--muted);white-space:nowrap}
+  code{background:var(--code);border:1px solid #e9eaec;border-radius:4px;padding:1px 5px;
+       font:12.5px/1.5 Consolas,"Cascadia Mono",monospace;word-break:break-all}
+  .ok{color:var(--ok);font-weight:600}
+  .warn{color:var(--warn);font-weight:600}
+  ul{margin:8px 0 0;padding-left:20px} li{margin:6px 0}
+  .note{background:var(--warnbg);border:1px solid #fde68a;border-radius:8px;padding:12px 16px;font-size:13.5px}
+  .pass{background:var(--okbg);border:1px solid #bbf7d0;border-radius:8px;padding:12px 16px;font-size:13.5px}
+  .before{color:#b91c1c}.after{color:var(--ok)}
+  .path{font:12.5px/1.6 Consolas,monospace;color:var(--muted)}
+  footer{margin-top:36px;padding-top:18px;border-top:1px solid var(--line);color:var(--muted);font-size:12.5px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>旧技能名 .md 全量清洗 <span class="badge">6 个技能根 · 0 残留</span></h1>
+  <div class="sub">2026-11-08 11:40 · 承接「删掉 ACCIO 侧 6 个旧副本」后的遗留项 · 精确子串替换，不动其他内容</div>
+</header>
+
+<div class="cards">
+  <div class="card"><b>6</b><span>活跃技能根</span></div>
+  <div class="card"><b>60</b><span>改写 .md 文件</span></div>
+  <div class="card"><b>112</b><span>原命中行</span></div>
+  <div class="card"><b>25</b><span>精确替换规则</span></div>
+  <div class="card"><b>0</b><span>改后残留</span></div>
+</div>
+
+<div class="pass"><b>结论：</b>WorkBuddy canonical 与 ACCIO 5 个技能根里，所有活跃 <code>.md</code> 已不再出现
+<code>pdms-dialog-autoclose</code> / <code>pdms-pml-course</code> / <code>pdms-bridge-probe</code>。
+引用统一指向 <code>pdms-dialog</code> / <code>pdms-pml</code> / <code>pdms-bridge</code> 及其真实 reference 路径；
+溯源说明改用「原课程版 / 原看门狗版 / 原探活版（已归档）」描述性称谓，历史信息不丢。</div>
+
+<h2>一、改了哪三类</h2>
+
+<h3>A. 会扑空的实用引用（4 个文件，重点）</h3>
+<table>
+<tr><th>文件（只在 ACCIO 侧）</th><th class="before">改前</th><th class="after">改后（已核实路径真实存在）</th></tr>
+<tr><td><code>pdms-run-macro/SKILL.md</code><br><span class="path">ACCIO 增强版，2 个根</span></td>
+    <td><code>pdms-pml-course</code>（课程）与 <code>pdms-dialog-autoclose</code>（弹窗）各自列为独立技能</td>
+    <td><code>pdms-pml/references/</code>（按 <code>macros-variables</code> / <code>element-navigation</code> / <code>control-flow</code> / <code>files</code> 路由）；
+        <code>pdms-dialog</code>（交互式取证 + <code>references/auto-close-watchdog.md</code>）</td></tr>
+<tr><td><code>pdms-bridge-identifier-lint/SKILL.md</code></td>
+    <td><code>pdms-pml-course</code> 硬约束 6；<code>references/element-navigation.md</code></td>
+    <td><code>pdms-pml</code> 课程版硬约束 6；<code>pdms-pml/references/element-navigation.md</code> + <code>pdms-pml/assets/examples/locate_demo.pml</code></td></tr>
+<tr><td><code>pdms-bridge-port-binding/SKILL.md</code></td>
+    <td>模态框冻结线程「见 <code>pdms-dialog-autoclose</code>」</td>
+    <td>「见 <code>pdms-dialog</code> 的常驻看门狗章节 <code>references/auto-close-watchdog.md</code>」</td></tr>
+<tr><td><code>pdms-run-macro/SKILL.workbuddy.md</code><br><span class="path">canonical 副本</span></td>
+    <td>「原 <code>pdms-pml-course</code> 已并入并归档」</td>
+    <td>「原课程版已并入并归档」，主引用保持 <code>pdms-pml</code></td></tr>
+</table>
+
+<h3>B. 溯源说明与版本日志（canonical 三件套 + expert + 方法论）</h3>
+<div class="box">
+<ul>
+  <li><code>pdms-bridge/SKILL.md</code>、<code>references/probe-and-macro-batching.md</code>：4 + 2 处 → 「原「探活版」，已归档」，版本日志补「外部引用统一走 <code>pdms-bridge</code>」。</li>
+  <li><code>pdms-dialog/SKILL.md</code>、<code>references/auto-close-watchdog.md</code>：3 + 2 处 → 「原「看门狗版」（已归档）」，归档路径改成 <code>skill-archive</code> 目录（2026-11-08）。</li>
+  <li><code>pdms-pml/SKILL.md</code>：3 处 → 「清理历史残留副本（原课程版）」，v2.1.0 合并说明改「与原课程版合并」。</li>
+  <li><code>pdms-expert/references/discipline.md</code>、<code>postmortems.md</code>：各 1 处 → 「原课程版已归档」/「<code>pdms-dialog</code>（含常驻看门狗章节）」。</li>
+  <li><code>skill-merge-pack/SKILL.md</code>：变体章节标题去掉旧 ID，改「2026-11-08 三技能整合实战」。</li>
+</ul>
+</div>
+
+<h3>C. 技能自身改进（顺手补的两条坑）</h3>
+<div class="box">
+<ul>
+  <li>合并验收条目升级：<b>旧目录被删除（不只归档）后，连溯源说明里的旧 ID 也要清洗</b>，否则技能目录里留着指向不存在技能的 ID。</li>
+  <li>新增「阶段二：多客户端技能副本一起改」：全根扫描 → 按相对路径的精确子串替换表 → <code>newline=""</code> 保 CRLF → 双验（全根 0 残留 + 同步器 dry-run <code>new=0 overwrite=0</code>）→ 只快照将被改写的原件。</li>
+  <li>该改进已通过同步器下发到 5 个 ACCIO 目标，<code>verify: PASS</code>。</li>
+</ul>
+</div>
+
+<h2>二、验证证据</h2>
+<table>
+<tr><th>检查项</th><th>结果</th></tr>
+<tr><td>独立扫描器全根复验（所有 <code>.md</code>）</td><td class="ok">6 根全部 files=0 hits=0；TOTAL 0</td></tr>
+<tr><td>替换器内置校验</td><td class="ok">25/25 规则命中；改写后文件内旧名 = 0；written files = 60</td></tr>
+<tr><td>同步器 <code>--dry-run</code>（WB ↔ ACCIO 是否失配）</td><td class="ok"><code>new=0 overwrite=0 same=911 target-only=7 protected=4 written=0</code></td></tr>
+<tr><td>frontmatter 完整性（6 个 canonical）</td><td class="ok">name / version / YAML 全部完好，未被替换波及</td></tr>
+<tr><td>ACCIO 增强版独有章节</td><td class="ok">只替换命中的行；「六、关联技能」等其余内容逐行抽查无变化</td></tr>
+<tr><td>同步 <code>skill-merge-pack</code> 到 5 个目标</td><td class="ok"><code>new=0 overwrite=5 verify PASS</code>，5 个目标均含新章节</td></tr>
+</table>
+
+<h2>三、明确没动的（按约定 / 属历史档案）</h2>
+<div class="note">
+<ul>
+  <li><b><code>account-1796501114/skills_config.json</code></b> 仍有 2 条旧 <code>enabled</code> 记录 —— ACCIO 客户端自托管，<b>手改会产生「看着配好、运行时不加载」的假 ID</b>。重启 ACCIO 或新建会话让它自行刷新。</li>
+  <li><code>skill-archive/</code> 里 3 个归档原件的 <code>SKILL.md</code> 仍写着旧 <code>name</code> —— 那是历史档案（可回溯合并前原貌），不是活跃引用，保留原样。</li>
+  <li>同步脚本 <code>RETIRED</code> 常量含旧名（<code>--retire</code> 功能需要）、历史报告 HTML 含旧名（凭证）、构建中间产物含旧名 —— 均不在活跃技能文档范围。</li>
+  <li>ACCIO 客户端有技能描述缓存，<b>改完需重启 ACCIO 或新建会话</b> 才能看到新文案。</li>
+</ul>
+</div>
+
+<h2>四、前后对照（摘录）</h2>
+<div class="box">
+<p><span class="before">改前：</span> <code>## 会话探活与防阻塞（合并自 pdms-bridge-probe）</code><br>
+   <span class="after">改后：</span> <code>## 会话探活与防阻塞（合并自原「探活版」，已归档）</code></p>
+<p><span class="before">改前：</span> <code>- `pdms-dialog-autoclose`（PDMS 弹窗自动关闭：headless 跑宏时弹窗挂住命令线程的兜底方案）。</code><br>
+   <span class="after">改后：</span> <code>- `pdms-dialog`（PDMS 弹窗一站式：交互式取证 + 常驻看门狗 `references/auto-close-watchdog.md`；…）。</code></p>
+<p><span class="before">改前：</span> <code>- v2.0.0（2026-11-08）：并入 `pdms-bridge-probe`（…）；旧技能名只作溯源。</code><br>
+   <span class="after">改后：</span> <code>- v2.0.0（2026-11-08）：并入原「探活版」技能（…）；旧技能已归档，外部引用统一走 `pdms-bridge`。</code></p>
+</div>
+
+<h2>五、交付物</h2>
+<table>
+<tr><th>文件</th><th>用途</th></tr>
+<tr><td><code>skill-merge-build/rewrite_stale_refs.py</code></td><td>25 条精确规则、6 根批量改写、内置零残留校验，支持 <code>--dry-run / --apply</code></td></tr>
+<tr><td><code>skill-merge-build/scan_stale_refs.py</code></td><td>独立扫描器，按根/文件/行号列出所有旧名命中</td></tr>
+<tr><td><code>skill-archive/stale-refs-presync-20261108.zip</code></td><td>60 个被改写文件的原件快照（按根分目录），可回滚</td></tr>
+<tr><td><code>skill-merge-build/stale_refs_scan.txt</code> / <code>stale_full_lines.txt</code></td><td>改前盘点证据（112 处命中、完整行内容）</td></tr>
+<tr><td><code>reports/skill-stale-refs-cleanup-20261108.html</code></td><td>本报告</td></tr>
+</table>
+
+<footer>PDMS大拿 🔧 · 证据优先：只信全根扫描与同步器 dry-run 的实测输出，不信「应该改好了」。PDMS 实机出图不在本次范围。</footer>
+
+</div>
+</body>
+</html>

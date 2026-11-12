@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>(15f) 管线号贴线根因修复 + 图例入库可行性 · 2026-11-10</title>
+<style>
+  :root{--bg:#f7f8fa;--card:#fff;--ink:#1f2328;--sub:#57606a;--line:#d8dee4;--accent:#0969da;--ok:#1a7f37;--warn:#9a6700;--bad:#cf222e;--code:#f2f4f7}
+  *{box-sizing:border-box}
+  body{margin:0;padding:32px 20px 60px;background:var(--bg);color:var(--ink);font:14px/1.7 -apple-system,"Segoe UI","Microsoft YaHei",sans-serif}
+  .wrap{max-width:980px;margin:0 auto}
+  h1{font-size:24px;margin:0 0 6px;letter-spacing:.3px}
+  .meta{color:var(--sub);font-size:13px;margin-bottom:24px}
+  h2{font-size:18px;margin:28px 0 12px;padding-left:10px;border-left:4px solid var(--accent)}
+  h3{font-size:15px;margin:18px 0 8px;color:var(--sub)}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:18px 20px;margin-bottom:16px}
+  .lead{background:#eef5ff;border:1px solid #b6d4f8;border-radius:8px;padding:16px 20px;margin-bottom:20px}
+  .lead b{color:var(--accent)}
+  code{background:var(--code);padding:1px 5px;border-radius:4px;font:12.5px/1.6 Consolas,"Courier New",monospace}
+  pre{background:#1f2328;color:#e6edf3;padding:14px 16px;border-radius:6px;overflow-x:auto;font:12.5px/1.65 Consolas,"Courier New",monospace;margin:10px 0}
+  table{width:100%;border-collapse:collapse;margin:10px 0;font-size:13px}
+  th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+  th{background:#eef1f4;font-weight:600;white-space:nowrap}
+  .ok{color:var(--ok);font-weight:600}
+  .bad{color:var(--bad);font-weight:600}
+  .warn{color:var(--warn);font-weight:600}
+  ul{margin:8px 0 8px 20px;padding:0}
+  li{margin:4px 0}
+  .tag{display:inline-block;background:#eaeef2;border-radius:4px;padding:1px 7px;font-size:12px;color:var(--sub);margin-right:6px}
+  .foot{color:var(--sub);font-size:12.5px;margin-top:26px;border-top:1px solid var(--line);padding-top:14px}
+</style>
+</head>
+<body><div class="wrap">
+
+<h1>(15f) 管线号贴线根因修复 + 图例入库可行性</h1>
+<div class="meta">2026-11-10 · 主工程 D:\repos\drawingPDMS · 证据：op_replace_symbols.log / op_create_drawing.log / 离线 DXF / DLL 二进制</div>
+
+<div class="lead">
+<b>一句话结论：</b>①管线号没贴线，不是贴线算法不想贴，而是 <b>13n 页框坐标索引错位把 281 条 BRANCH 全预剔除了</b>，贴线通道一条可见段都拿不到（命中 0/93），93 个菱形被甩到图框边成排 + 每条一根长引线。已修并部署，重启 PDMS 重出图即可验证。<br>
+②<b>图例能在数据库里完成，但当前这台机器的符号库是空的</b>——出图日志实测 <code>/MDS/ABA/TAGS/*</code>、<code>/TT/Isometric_ADP/*</code> 绝大多数 SYTM 模板「缺失(渲染空白)」，所以现在 382 个阀门/法兰/弯头/三通全靠 <code>replace_symbols</code> 画 9200 条线段。要改成库配置，得先补 SYTM 库再配引用规则。
+</div>
+
+<h2>一、管线号：为什么全被引出去了</h2>
+<div class="card">
+<h3>1. 现象（本轮 09:08 出图 + 离线 DXF 复核）</h3>
+<ul>
+<li>截图里 93 个菱形管线号沿图框上下边排成两带，一堆红色长引线斜穿设备区。</li>
+<li>DXF 统计：菱形 y 集中在 <code>100~180</code> 与 <code>670~730</code> 两带；x 集中在 <code>550~750</code>，是典型「视图四边成排」落位，不是贴线。</li>
+</ul>
+<h3>2. 日志证据链</h3>
+<pre>[09:08:14] (14u) 管线号贴线 = 命中0 回退旧环93 ... 归属段0/0 归属名匹配0/93
+[09:08:14] (14w) 贴线诊断 = 归属来源[精确名0 PIPE端点0 就近段0] ...
+[09:08:14] (14y) 锚点吸附 = 候选445 吸附0 超差淘汰445 旧环吸附0
+[09:07:36] (9c) 交叉断口 = 0  落线段 = 0  (13n) 预剔除分支 = 281
+[09:08:15] 红色管线 = 0  自绘流向箭头 = 0</pre>
+<p><code>归属段 0/0</code> = <b>pendStrokes 整个可见段表是空的</b>。14u/14w/14x/14y 这一整条贴线链路全在空转，之前 14w「罚分打分」、14x「幽灵序号」、14y「锚点吸附」调的都是一条没有输入的通道。</p>
+<h3>3. 根因：13n 页框索引错位（11-05 引入，潜伏至今）</h3>
+<p><code>drawE3DTool.ParseLimitsString</code> 对 <code>From W… N… U… To W… N… U…</code> 实际返回 <b>[Wfrom, Nfrom, Ufrom, Wto, Nto, Uto]</b>，但函数注释写的是 <code>[xmin,xmax,ymin,ymax,zmin,zmax]</code>。13n 照注释取索引：</p>
+<pre>旧：pageBox = { lb[0]-mg, lb[2]-mg, 0, lb[1]+mg, lb[3]+mg, 0 }
+ → W1878552  N-4900  TO W1594600  N1904422   （xmin &gt; xmax，框倒置）
+判据 bb[0] &gt; pageBox[3] 恒真 → 281 条 BRANCH 全部被剔除</pre>
+<p>连锁反应：无 BRANCH → 无 strokes → <code>pendStrokes=0</code> → 贴线无候选 → 93 个编号全走 9e 旧环 → <code>PlaceEscort</code> 把菱形推到图框边 → 每条画一根长引线。截图里那一堆乱红线就是这么来的。</p>
+<h3>4. 修复（段号 15f，主工程 headlessDrawing.cs）</h3>
+<table>
+<tr><th>#</th><th>改动</th><th>效果</th></tr>
+<tr><td>1</td><td>13n 页框按真实顺序重建：<code>{lb[0]-mg, lb[1]-mg, 0, lb[3]+mg, lb[4]+mg, 0}</code></td><td>BRANCH 恢复正常收集，pendStrokes 有可见段，14u/14w/14y 贴线链路真正生效</td></tr>
+<tr><td>2</td><td>新增 <code>labNoLead=1</code> / <code>labNoLeadMax=18</code>：旧环回退禁用 PlaceEscort/PlaceBest 远跳，菱形按原方向收回锚点 18mm 内</td><td>贴线没命中的编号也不再被甩到图框外</td></tr>
+<tr><td>3</td><td>超 <code>18×1.6=28.8mm</code> 的引线直接不画；新增 <code>(15f) 不引出</code> 统计日志</td><td>图面不再出现斜穿全图的长引线，且可量化验收</td></tr>
+</table>
+<p><span class="tag">顺带订正</span> <code>headlessDrawing.cs:1850</code> 与 <code>drawE3D.cs:521</code> 也把同一函数当 <code>[xmin,xmax,…]</code> 用（viewMinX=Wfrom / viewMaxX=Nfrom），当前被 WORPOS 盒覆盖未暴露。本次只修 13n 局部，不改函数返回值，零副作用。</p>
+</div>
+
+<div class="card">
+<h3>5. 编译 / 部署门禁</h3>
+<table>
+<tr><th>门禁项</th><th>结果</th></tr>
+<tr><td>dotnet build</td><td class="ok">0 错误 / 8 个既有警告（MSB3270 架构 + 2 个未用变量）</td></tr>
+<tr><td>产物</td><td>544,768 B · SHA256 <code>79fecb2fdeabd3ef3eb75bd013a4fd2cd01c15cba6235160bd25584217a91a7f</code></td></tr>
+<tr><td>三处同哈希</td><td class="ok">build_check_15f / C:\AVEVA\Plant\PDMS12.1.SP4\ / D:\studio\ 全一致</td></tr>
+<tr><td>UTF-16 段号串</td><td class="ok"><code>(15f) 13n 页框修正</code> / <code>(15f) 不引出</code> / <code>labNoLead</code> / <code>labNoLeadMax</code> 全 True；<code>(15d)</code> 保留</td></tr>
+<tr><td>回滚</td><td>旧 DLL <code>…\drawingPDMS.dll.bak_pre15f_20261110</code>（SHA 93fc6003…）；源码 <code>diag\headlessDrawing.cs.bak_pre15f_20261110_093406</code>；软开关 <code>labNoLead=0</code> / <code>labOnPipe=0</code></td></tr>
+<tr><td>状态</td><td class="warn">部署时 PDMS 桥 offline（PDMS 未运行），文件无占用；<b>需重启全部 PDMS 模块</b>后新 DLL 才生效</td></tr>
+</table>
+<h3>6. 重出图后看这三条日志验收</h3>
+<pre>(15f) 13n 页框修正 = W… N… TO W… N… (XY索引已纠正)   ← 框不再是 xmin&gt;xmax
+(14u) 管线号贴线 = 命中N 回退旧环M … 归属段A/B           ← 命中数应 &gt; 0，A/B &gt; 0
+(15f) 不引出 = 拉回N 抑制长引线N 最长回退引线Xmm          ← X 应 ≤ 18mm 量级</pre>
+<p class="warn">注意：修好 13n 后自绘红色管线覆盖层（13w）会一并恢复，图面会比现在多出管线中心线/交叉断口/流向箭头，属设计意图；若只想要贴线数据不想要红线，出图参数传 <code>pipeOverlay=0</code>。</p>
+</div>
+
+<h2>二、图例替换：能不能在数据库里完成</h2>
+<div class="card">
+<h3>1. 结论：机制上能，但这台机器的库是空的</h3>
+<p>09:06:52 出图日志的「符号模板体检」实锤：</p>
+<pre>/TT/Isometric_ADP/Arrow1     => 缺失(渲染空白)
+/TT/Isometric_ADP/Flan       => 缺失(渲染空白)
+/MDS/ABA/TAGS/ELBO           => 缺失(渲染空白)
+/MDS/ABA/TAGS/ELBO--UP       => 缺失(渲染空白)
+/MDS/ABA/TAGS/Valv-H / Valv-V=> 缺失(渲染空白)
+/MDS/ABA/TAGS/CIRCLE/2       => 存在 type=SYTM
+/TT/DRA/MAS/LABELS/GEN/PIPE/END => 存在 type=SYTM</pre>
+<p>PDMS 原生视图要按元件类型套图例，靠的是 <b>SYTM（Symbol Template）符号库 + 表示规则</b>。这俩模板库基本没装，所以 <code>UPDATE all</code> 出不来图例。现在 <code>replace_symbols</code> 每次画 <b>弯头77 / 阀门71 / 法兰127 / 三通107</b>（约 9200 条命令）把符号补上去——用户圈出来的那几处红色小图例，就是这么后画出来的，不是库里带出来的。15c 那个阀门按管径缩放，本质就是在给「代码推算的符号尺寸」打补丁。</p>
+<h3>2. 为什么以前没能建库（已排除）</h3>
+<p>历史结论是「SYTM 建库失败」：<code>SymBlocks.cs</code> 头注释实锤，SYTM/LALB 属 <b>LIBRARY 世界</b>，当年挂在 DRAFT 世界的 DEPT 下，<code>CreateLast</code> 一律抛「应用程序中的错误」。但 14p 已经证明 <code>LIBY → RPLB → STYL</code> 四级链路可建（线型样式库就是这么建的），所以「在库里配符号」这条路是通的，只是父级挂错了世界。</p>
+<h3>3. 两条实施路线</h3>
+<table>
+<tr><th>路线</th><th>做什么</th><th>收益</th><th>代价 / 风险</th></tr>
+<tr><td><b>A 折中（推荐先做）</b></td><td>在 LIBY 世界下一次性建 13 个 SYTM（阀门/截止阀/弯头上下翻/三通/法兰/盲板/焊点/异径管/管架/箭头）；<code>replace_symbols</code> 由「画 9200 条 STRAIGHT」改为「插入 SLABEL 引用 SYTM」</td><td>图例几何真正从库里来，改样式只改库不用重编译；位置/朝向仍由代码按真实元件定位，效果可控</td><td>中等；需 SAVEWORK 落库，先做符号库不影响既有图纸</td></tr>
+<tr><td><b>B 彻底</b></td><td>A + 配 Draft 表示规则（RULB/ADET 的 SYMBOL 引用）或 Paragon 元件库 SCOM 的符号引用（DTREF/DSYMBOL），让 <code>UPDATE all</code> 自动按 CATREF 出图例</td><td>不用再跑 replace_symbols 的符号段；全项目所有图纸自动统一，符号大小/朝向由 PDMS 按真实几何与比例算</td><td>大；改项目库影响面广，规则配错会全项目渲染空白，须测试库先做</td></tr>
+</table>
+<h3>4. 三个必须说清的限制</h3>
+<ul>
+<li><b>裸元件认不出</b>：没有合法 CATREF 的元件（本项目里有一部分），表示规则匹配不上，仍会渲染空白，得保留代码兜底。</li>
+<li><b>模板库随项目走</b>：<code>/MDS/ABA/TAGS</code> 这类是项目模板，换电脑/换项目就没了——这正是当年改自绘的原因；自建 <code>/AGT_SYMS</code> 库才能随部署走。</li>
+<li><b>不是「替换」而是「出图时自动带出」</b>：数据库配置解决的是「符号从哪来」，解决不了「这张图上已有图形怎么就地改写」；后者仍是后处理。</li>
+</ul>
+<p><b>建议：</b>先做 A（补 13 个 SYTM + 代码改引用），验证符号一致后再评估要不要上 B 的表示规则。改库属于项目级动作，已留给用户拍板，本轮<b>没有动任何数据库</b>。</p>
+</div>
+
+<h2>三、下一步</h2>
+<div class="card">
+<ol>
+<li>重启全部 PDMS 模块 → 重出同一张图 → 对上面三条 <code>(15f)</code>/<code>(14u)</code> 日志验收贴线命中数与引线长度；截图回传看菱形是否贴在自己管线上。</li>
+<li>若贴线命中仍偏低，再调 <code>labScoreMax</code>（现 32，调大更愿意贴线）、<code>labGap</code>（5.5mm）。</li>
+<li>图例入库选 A 还是 B 给个方向，再动项目库（先在测试库做 + SAVEWORK）。</li>
+</ol>
+</div>
+
+<div class="foot">报告生成：2026-11-10 09:4x · 仅依据本地日志、源码、DXF 与 DLL 二进制取证；未在 PDMS 在线状态验证运行效果。</div>
+
+</div></body></html>

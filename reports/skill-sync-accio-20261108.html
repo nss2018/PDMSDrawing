@@ -1,0 +1,23 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8">
+<title>WorkBuddy → ACCIO 技能同步报告</title><style>
+body{background:#f6f7f9;color:#20242b;font:14px/1.6 -apple-system,"Microsoft YaHei",sans-serif;margin:0;padding:32px}
+.wrap{max-width:1000px;margin:auto;background:#fff;border:1px solid #e3e6ea;border-radius:10px;padding:28px 32px}
+h1{font-size:22px;margin:0 0 6px}h2{font-size:16px;margin:26px 0 10px;border-left:3px solid #2f6fdb;padding-left:10px}
+.sub{color:#6b7280;font-size:13px}table{border-collapse:collapse;width:100%;margin:10px 0}th,td{border:1px solid #e5e8ec;padding:7px 10px;text-align:left;font-size:13px}th{background:#f2f5f9}
+code{background:#f1f3f6;padding:1px 5px;border-radius:4px;font-size:12px}
+.ok{color:#16794a;font-weight:600}.warn{color:#b45309;font-weight:600}.bad{color:#b42318;font-weight:600}
+ul{margin:8px 0;padding-left:22px}li{margin:3px 0}
+</style></head><body><div class="wrap">
+<h1>WorkBuddy → ACCIO 技能同步报告</h1>
+<div class="sub">生成时间 2026-11-08 11:10:21 ｜ 模式 实际执行 ｜ 源 <code>C:\Users\Nie\.workbuddy\skills</code></div>
+<h2>汇总</h2><p>技能 <b>21</b> 个 ｜ 目标 <b>5</b> 个 ｜ 新增 <b>824</b> 文件 ｜ 覆盖 <b>10</b> 文件 ｜ 已一致 <b>77</b> 文件 ｜ 目标独有保留 <b>3</b> 文件</p>
+<p>一致性校验：<span class="ok">PASS（源文件逐一对上）</span> ｜ 覆盖前备份：<code>D:\repos\pdmsDrawing\skill-archive\accio-presync-20261108.zip</code>（66 文件）</p>
+<h2>分目标明细</h2><table><tr><th>目标</th><th>技能数</th><th>新增</th><th>覆盖</th><th>已一致</th><th>独有保留</th></tr><tr><td>account-1794603983</td><td>21</td><td>179</td><td>0</td><td>4</td><td>1</td></tr><tr><td>account-1796501114</td><td>21</td><td>151</td><td>5</td><td>25</td><td>0</td></tr><tr><td>account-7099707696</td><td>21</td><td>183</td><td>0</td><td>0</td><td>0</td></tr><tr><td>account-7100633559</td><td>21</td><td>183</td><td>0</td><td>0</td><td>0</td></tr><tr><td>skill</td><td>21</td><td>128</td><td>5</td><td>48</td><td>2</td></tr></table>
+<h2>规则与注意</h2><ul>
+<li>增量不删：目标目录里多出的文件（ACCIO 侧扩展）全部保留，共 3 个。</li>
+<li>未改 <code>skills_config.json</code> / <code>skills.jsonc</code> / <code>remote_skills_cache.json</code>：ACCIO 客户端自托管这些文件，手改会产生不加载的假 ID。</li>
+<li>保护升级：2 个 ACCIO 增强版文件未覆盖（pdms-run-macro/SKILL.md, pdms-spec-bolting-gasket/SKILL.md），WorkBuddy canonical 版另存为 <code>SKILL.workbuddy.md</code>。</li>
+<li>旧副本 <b>已删除</b>（2026-11-08 11:21，经聂工两次确认、不做备份）：C 盘 3 个目录进 Windows 回收站可还原，D:\skill 3 个目录因 FAT32 无回收站而<b>永久删除不可恢复</b>；共 6 个目录 / 44 文件。canonical 技能在 5 个目标里全部完好。</li>
+<li>ACCIO 客户端正在运行时可能缓存技能清单，同步后建议重启 ACCIO（或新建会话）再确认。</li>
+<li>不要在 ACCIO 侧再跑旧版 <code>sync_skills.py</code>（agent-core 仍是 10-28 老源），否则会把 account / D:\skill 回滚。</li>
+</ul></div></body></html>

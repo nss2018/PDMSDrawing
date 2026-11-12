@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-page-node-id="PCXzTJ6uGgB3RNPdQ1Lt5u">
+<head data-page-node-id="ZTWBFjOIrFumt4GfjeLIqX">
+<meta charset="utf-8" data-page-node-id="TrIy3rhcxrv2gmXzxbBZoM">
+<title>对标武汉维图 WT-DRAW：pdmsDrawing 出图程序优化报告</title>
+<style>
+  :root{--bg:#f5f7fa;--card:#fff;--ink:#1f2933;--sub:#5b6770;--line:#dfe5ec;--blue:#1d5fbf;--green:#1f7a4d;--amber:#b06a00;--red:#b42318;--chip:#eef4ff}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.7 "Microsoft YaHei","Segoe UI",Arial,sans-serif}
+  .wrap{max-width:1080px;margin:32px auto 64px;padding:0 22px}
+  header{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:26px 30px;margin-bottom:18px}
+  h1{margin:0 0 8px;font-size:24px;color:var(--blue)}
+  .meta{color:var(--sub);font-size:13px}
+  section{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:22px 30px;margin-bottom:18px}
+  h2{font-size:18px;margin:0 0 14px;padding-left:10px;border-left:4px solid var(--blue)}
+  h3{font-size:15px;margin:20px 0 8px;color:var(--blue)}
+  p{margin:8px 0}
+  table{width:100%;border-collapse:collapse;margin:10px 0 16px;font-size:13px}
+  th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+  th{background:#f0f4fa;color:#33404d;font-weight:600}
+  tr:nth-child(even) td{background:#fafbfd}
+  code{background:var(--chip);padding:1px 5px;border-radius:4px;font-family:Consolas,monospace;font-size:12px}
+  .ok{color:var(--green);font-weight:600}.no{color:var(--red);font-weight:600}.part{color:var(--amber);font-weight:600}
+  .tag{display:inline-block;padding:1px 8px;border-radius:10px;font-size:12px;font-weight:600}
+  .p0{background:#e6f4ec;color:var(--green)}.p1{background:#fff2dc;color:var(--amber)}.p2{background:#eef4ff;color:var(--blue)}
+  .callout{border-left:4px solid var(--amber);background:#fff9ef;padding:12px 16px;border-radius:0 8px 8px 0;margin:14px 0}
+  .good{border-left-color:var(--green);background:#f0f8f3}
+  ul{margin:8px 0 8px 20px;padding:0}li{margin:4px 0}
+  .small{color:var(--sub);font-size:12px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .box{border:1px solid var(--line);border-radius:8px;padding:12px 16px;background:#fbfcfe}
+  .box b{color:var(--blue)}
+  @media(max-width:760px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body data-page-node-id="hC9yDMaR0YA0tQccfQv9WV">
+<div class="wrap" data-page-node-id="tIRIMGgg2HyDnrpniZOCeh">
+
+<header data-page-node-id="ErcjBULEmeMDCD6Ow97zpV">
+  <h1 data-page-node-id="y8hpEdFBsvGGitiLCMkBJv">对标武汉维图 WT-DRAW：pdmsDrawing 出图程序优化报告</h1>
+  <div class="meta" data-page-node-id="A52zKYrFzsRyD7H2yHcMsV">2026-11-08 · 第一轮（规范集中化 + 批量无人值守）· 工作区 D:\repos\pdmsDrawing</div>
+  <div class="meta" data-page-node-id="foYNALv57A8BI37EoueFwB">参考：武汉维图软件科技有限公司 WT-DRAW 智能出图系统 / 维图 E3D PDMS 出图软件公开产品资料；HG/T 20519-2009、SH/T 3052-2014 条文</div>
+</header>
+
+<section data-page-node-id="Ikhuln0Ao9uJxnuaMiHJli">
+  <h2 data-page-node-id="AMStPx9hRXpdyhdw6ErBZB">0. 结论速览</h2>
+  <div class="grid" data-page-node-id="C8M3s6gdy7Ex04NiylFc84">
+    <div class="box" data-page-node-id="XLMGxvsmBT7Gnii8Yna1aw"><b data-page-node-id="L8kqcQi16xOkY1YAGspuLR">本轮已落地（可验证）</b>
+      <ul data-page-node-id="BkINz5VGngFpDDdBL1QmMg">
+        <li data-page-node-id="geapCD8zFm3HAqvWgHHkoF"><code data-page-node-id="0BGS67pxvMSvR9QGx5H0uc">drawingStandard.cs</code>：出图规范集中配置，3 套预设 + 参数覆盖 + 非致命合规校验，已接入图层体系与 45° 引线。</li>
+        <li data-page-node-id="xRzZPFZV9RPq8pzHYxl6XS"><code data-page-node-id="3xokl4sLyZacGCR4BEOdPh">batch_draw.py</code>：批量出图驱动，逐图独立工作目录、断点续跑、失败重试、PDF 归档、Markdown/JSON 汇总报告。</li>
+      </ul>
+    </div>
+    <div class="box" data-page-node-id="BK1GkBljzQV4sZk2GTwLPV"><b data-page-node-id="d35VEDhpSh2KQpXgJwdENS">验证结果</b>
+      <ul data-page-node-id="MaGbPUy5FQnGVfYI0nFJck">
+        <li data-page-node-id="7KB7WkDhOBWMChTR5ZI1ri">C# 编译：<span class="ok" data-page-node-id="d3mTXZRlcWkmzWf8cfXcLS">0 警告 0 错误</span>（输出重定向到 build_check，未覆盖 PDMS 安装目录 DLL）。</li>
+        <li data-page-node-id="Q4JCUhHro5dZWmHOd7OMdU">Python：语法检查通过；dry-run 3 图「2 成 1 败」→ <code data-page-node-id="XtiHqLWyBp2AxEmyaCKTXv">--resume --retry 1</code> 全绿；PDF 归档单测通过。</li>
+        <li data-page-node-id="invQWpinV3eIpAfihVP9RG">PDMS 实机出图效果：<span class="no" data-page-node-id="906WGS12YyIndzBoyJEr00">未实测</span>（需重启模块加载新 DLL）。</li>
+      </ul>
+    </div>
+  </div>
+  <div class="callout" data-page-node-id="PO923rFDbbFBeT0XW5qxlQ"><b data-page-node-id="IEw7RPRITY0tJGb9PMzjVS">需你拍板的一件事：</b>本机存在两套同源工程——工作区 <code data-page-node-id="5HPtGBLDiMi2K7TYqssvDn">D:\repos\pdmsDrawing</code> 是 10-28 沉淀版（5504 行 headlessDrawing.cs），而 <code data-page-node-id="qvEYNWIGHsYm2Kkfm5v5Zb">D:\repos\drawingPDMS</code> 是 11-06 持续开发版（约 8000 行，已含管口方位图、原比例分页、提速引擎、DrawingWizard）。本轮改动落在工作区沉淀版；若实际主工程是 11-06 版，需要把 2 个新文件 + 3 处接入迁移过去。详见第 5 节。</div>
+</section>
+
+<section data-page-node-id="PSHxl3HImsv9lFOXDYdlig">
+  <h2 data-page-node-id="OC9ihWEEI3AwmS1kRYSakY">1. 参考对象：维图出图程序的公开能力清单</h2>
+  <table data-page-node-id="LKOicPHSAvOddGmcp2VSvj">
+    <tr data-page-node-id="jdIXtXqJL1aycAwApfkRVz"><th data-page-node-id="ZBxGIo80dP0kp61TblF7B8">维度</th><th data-page-node-id="3Nl0AqMZqi80hzffBnNUr7">维图 WT-DRAW / 维图 E3D PDMS 出图软件</th></tr>
+    <tr data-page-node-id="YSUYN7iH341AF5gG0TTPim"><td data-page-node-id="zdl52nZtKiErhMjCiN8UHF">定位</td><td data-page-node-id="BrJzTPbtuKBbFVrZEGy32B">基于 AVEVA PDMS/E3D 的智能出图工具；宣称一键出图提升效率 95%、图纸内容无需人工修改</td></tr>
+    <tr data-page-node-id="MjEFKAqDddNyDKTwVtgNA9"><td data-page-node-id="x7CKlBhEUcPygIj3TIc4o2">出图方式</td><td data-page-node-id="lhnU0HZ1OZGFG6isCVEAXc">一键快速出图、批量出图、无人值守模式；剖切视图 / 批量流程做了 UI 优化；项目-系统-图纸树管理</td></tr>
+    <tr data-page-node-id="Q1nTINQswIXFj3meTujrRY"><td data-page-node-id="3g1kf4YbX5RYlBnbjDZe0i">图纸类型</td><td data-page-node-id="HNDdz0GvmjYCnKIAegQvJD">管道平立面布置图、设备布置图、管口方位图、孔洞条件图、仪表条件图、桥架/结构/暖通布置图、给排水轴测图</td></tr>
+    <tr data-page-node-id="ZUgmF6NW6ymVTA1l3HDPjA"><td data-page-node-id="ihGgJfGS7lw2E91LdoaHXf">标注与成果</td><td data-page-node-id="jPBB81lGfrqMJ1ay0jF3QH">自动尺寸/管口/标高标注、自动按标准分层、输出「智能 CAD 图纸」；批量导出 DWG/PDF</td></tr>
+    <tr data-page-node-id="MSU2BFjc2C0yuTUU62dnQu"><td data-page-node-id="w0Cstal39qgfP8YF1wvhHq">遵循规范</td><td data-page-node-id="RKysnbkeX6YqPqDDFNY2MA">SH/T 3052-2014（配管工程图例）、SY/T 0003-2012、HG/T 20519-2009（施工图内容与深度）；图纸字体、线段、材料表符合规范</td></tr>
+  </table>
+
+  <h3 data-page-node-id="nAyJH8RgRgnN3vDVxC19RU">规范里可量化的硬指标（本轮配置的依据）</h3>
+  <table data-page-node-id="s0RxvECVGDKU1yL7HvaahO">
+    <tr data-page-node-id="gGITWwEdPcMgPEalfTsAU0"><th data-page-node-id="URa3B8UgXXwMwBFt80dtdV">项目</th><th data-page-node-id="RCcppcEXnipDr5hOyTfR5c">指标</th><th data-page-node-id="6LZYpt2p8o17zo7tZV9VGv">出处</th></tr>
+    <tr data-page-node-id="AuMKIC0brO46xT0uclW38o"><td data-page-node-id="F2JSsj9A6F39oO8KNrjfEI">图线宽度</td><td data-page-node-id="b5zMfAk2ptmflbRWAr7DJg">粗线 0.6~0.9 / 中粗 0.3~0.5 / 细线 0.15~0.25 mm；平行线间距 ≥1.5 mm</td><td data-page-node-id="AgHXKanYKDy5lxZeEc3Tz2">HG/T 20519.1-2009 §6.1</td></tr>
+    <tr data-page-node-id="3MqQabILDGnoRdNrsRCTkF"><td data-page-node-id="3CTPZarnPWsip6HBwX8Cda">字高</td><td data-page-node-id="K0VaRNK2afcjOasQxKEgpy">图名 7；图名/视图符号 5~7；文字说明及轴线号 5；数字字母 2~3；表格 5（格高&lt;6 mm 时 3）；汉字 ≥2.5，A0/A1 汉字 &gt;5；长仿宋或正楷</td><td data-page-node-id="vFerrlfiLsy3Nbx6Q0QJ0o">HG/T 20519.1-2009 §6.2</td></tr>
+    <tr data-page-node-id="UOdi0OmTIE03qcHHS577vG"><td data-page-node-id="f5KWiyd1vZkxQoPgSUAs7b">图幅与比例</td><td data-page-node-id="P7Qi4pRZfXVnFyhF4dLKrU">管道布置图 A1 优先（简单 A2、复杂 A0），同区同图幅；常用 1:50（可 1:25 / 1:30），同区同比例</td><td data-page-node-id="ODteKnnAOgacatDLeUaqW8">HG/T 20519.4-2009 §2.1</td></tr>
+    <tr data-page-node-id="aaOlm5biDbznd5oMAO1Op4"><td data-page-node-id="WxMpyL4BsUwq6AbGD5YrsO">尺寸标注</td><td data-page-node-id="IqG8XCPvDPsux958B4jYXa">标高/坐标以 m 为单位取三位小数，其余尺寸以 mm 只注数字；尺寸线始末画箭头或斜杠；尺寸数字写在尺寸线上方中间且平行于尺寸线</td><td data-page-node-id="nkJIx3oHDA0DuljaHS2mXR">HG/T 20519.4-2009 §2.1</td></tr>
+    <tr data-page-node-id="aeMgiIbkAYf8UDNahClahy"><td data-page-node-id="rzhRUYI7fIUSIsgdtWUnl8">线型用途</td><td data-page-node-id="EnxV3rfw2Eq78OBbryju15">单线管 0.7、双线管 0.5、尺寸线/实线标注 0.25、中心线 0.2、双点画线边界 0.7 mm</td><td data-page-node-id="AQ8ZsaYA9Ns3ypdLhJVbG6">SH/T 3052-2014 §3.1</td></tr>
+  </table>
+</section>
+
+<section data-page-node-id="i8c4x19cFvDquTCmnAl2bG">
+  <h2 data-page-node-id="QOFI9HXfH8A9F56c0VUkF0">2. 现有工程能力盘点（本工作区 10-28 版）</h2>
+  <table data-page-node-id="3wcqpfpZgsAiGOhnFGomDJ">
+    <tr data-page-node-id="Zm78aj8bJJYj41pwDD49iE"><th data-page-node-id="62sHcLcED7IYicsXOV0P2i">能力</th><th data-page-node-id="zGarHpSgyvkkcBlFMO5NrM">现状</th><th data-page-node-id="YS5S5thakWmooesBVkscRo">证据 / 位置</th></tr>
+    <tr data-page-node-id="uf9HnNJmAOnjYbb3PRgwYY"><td data-page-node-id="vG8GAp58fM8hu07TXuoPYH">无头出图 op</td><td data-page-node-id="JBk6E5zfUz8eKTpP7KcDYi"><span class="ok" data-page-node-id="86GO7DExAMeCO3eNlB9iTz">已有</span> create_drawing / replace_symbols / export_dxf / export_pdf / material_report 等 20+ op</td><td data-page-node-id="8PUjWcOjhnOjZVXjj3fyVW">PdmsBridge.cs:275-301</td></tr>
+    <tr data-page-node-id="48MR76aFZGytFVPL6Rf2ef"><td data-page-node-id="DuLuZDP39PQl27Tt7u0FYG">Web 向导 + 云端反连</td><td data-page-node-id="gZzSGSzz7Qy7LhFRoETDey"><span class="ok" data-page-node-id="QAkKgKQEQJU14imYBCHWMj">已有</span> 一键流水线（出图→SAVEWORK→PDF→黑白→预览），agent 反连 relay</td><td data-page-node-id="lZHLjY2exjmhZOLINWiOQh">wizard.py:582 / agent.py / cloud/relay.py</td></tr>
+    <tr data-page-node-id="hUuyuEYXx06mMFtt3SPngq"><td data-page-node-id="R2ySsSFq5KEIFynaKNjWM0">5 图层归层</td><td data-page-node-id="sXTncHtPfhuWPbxAxr1rlc"><span class="ok" data-page-node-id="5ICiPF7spI3p8kwPugsQwm">已有</span> 外形/标注线/文字/图框/表格，VIEW 与 SHEET 分建，坐标安全</td><td data-page-node-id="4GEV2bH1bKM2qxL7KifIWM">layerManager.cs（10-28）</td></tr>
+    <tr data-page-node-id="krDH5POVLfpDYipEEQmMTu"><td data-page-node-id="ZcHqXxB0wrcFgWoYVCeTac">自动标注</td><td data-page-node-id="lrGAi8UdH6IZ3EsEd3poKl"><span class="ok" data-page-node-id="23NU3iduv0uEkkCHYJ722j">已有</span> 尺寸链、管线号菱形框、设备标高 PDS 样式、轴网气泡、设备 Origin 定位、智能选址避让</td><td data-page-node-id="SEDPfjMBCnJSVWH4Q9NC81">headlessDrawing.cs (9e/9g/9j/10a-10j)</td></tr>
+    <tr data-page-node-id="2BLQOUtbkYraMlUm4lfpGR"><td data-page-node-id="BmDljS2JWSO1Jq57ngzCF7">45° 引线（右上 &gt; 左上）</td><td data-page-node-id="KBKO0p7ccLkrJeIr66iJMm"><span class="part" data-page-node-id="455DsJbtdqFa8Gg5VdYfNy">部分</span> 9j 尺寸引出已是 45°/135°；9g 菱形框引线仍是「沿指向管线方向」的径向线（注释写 45° 但代码未落实）</td><td data-page-node-id="VGcahar9bxo4DEljXWVb40">headlessDrawing.cs:5034 / :4631</td></tr>
+    <tr data-page-node-id="9J3gk0rpejvChKHkwV6Sji"><td data-page-node-id="GCdDjOozzLRaXop4nhPbTE">规范符合性</td><td data-page-node-id="T4GEtEaFGXc834esGjNyRc"><span class="no" data-page-node-id="feZTV9XcUCAHqwrrLYUFAF">本轮前缺失</span> 字高 2.5、线型 "1"、A0 图框、色号散落硬编码，无预设、无校验、无证据输出</td><td data-page-node-id="ZyTyf6emDzPJp1bchHmQ6m">layerManager.cs:80 / headlessDrawing.cs:452</td></tr>
+    <tr data-page-node-id="m0jTAVoYIXgbYz8ls69Qtd"><td data-page-node-id="PdknuW87omPMinSex25z6S">批量出图 / 无人值守汇总</td><td data-page-node-id="98g7eoXB3Sp5zptdK2UGAE"><span class="no" data-page-node-id="SOhhyV6kFbGf1GqptkizxA">本轮前缺失</span> 一次一图、固定 preview.pdf，无图纸清单、无断点续跑、无批次报告</td><td data-page-node-id="ibbE8q1hT0qysW12raTWhW">wizard.py:582-631</td></tr>
+    <tr data-page-node-id="tnx24Tg8D7ZaogEeDhBzap"><td data-page-node-id="O2xznNazffsLTAmfTVR694">图纸类型</td><td data-page-node-id="JWuPODaKJXL0wi5LhHHkrQ"><span class="part" data-page-node-id="EzLJ1ab4JQLREpYB6WkFnV">部分</span> 本版：管道布置图 / 设备布置图 / 埋板布置图；11-06 版已增管口方位图、原比例分页、提速引擎</td><td data-page-node-id="3lz41zltvW8267AZdNzgdC">headlessDrawing.cs:3250 / D:\repos\drawingPDMS</td></tr>
+    <tr data-page-node-id="HuBKHc9cMNjVP6q4roFotp"><td data-page-node-id="NUrRqSxdoxcGsEeyJ4wyGx">出图质检</td><td data-page-node-id="AVCsGQpyghQ1Yk7HZQVU2E"><span class="no" data-page-node-id="IaC4tNKri84BdMYTxegvVm">缺失</span> 无标注越界/重叠/缺项的自动自检与报告（「无需人工修改」的关键闭环）</td><td data-page-node-id="nAIYskGJYOHEb4h204r74u">—</td></tr>
+  </table>
+</section>
+
+<section data-page-node-id="AcM4yFX1LFTK1fT55B9vXC">
+  <h2 data-page-node-id="nnqBZjF8GXhAvFLjhHQ9ij">3. 差距矩阵与优先级</h2>
+  <table data-page-node-id="BhCpgAocwtxdHTqA1jbFWs">
+    <tr data-page-node-id="RhJpZnR1CJSL0EnyzcMEBZ"><th data-page-node-id="MLK9Ufnd2uOA7u4q6IbERW">差距</th><th data-page-node-id="w2dpSHu3GMbeWHuE9TAOM8">维图做法</th><th data-page-node-id="JM5OBd1QX5CdvR0ObfZnZZ">建议动作</th><th data-page-node-id="bjmPsjETxmOTphavfn4De0">风险</th><th data-page-node-id="1xTtQojSzEnqAAwEUzulsY">优先级</th></tr>
+    <tr data-page-node-id="FdbJiE4lgVExjpPl6vCaXS"><td data-page-node-id="S4yC51bv5D0MaQ3ncYaEmU">规范参数散落</td><td data-page-node-id="mNjmV2wvh142r6bkuxOxlw">字体/线宽/材料表统一符合规范</td><td data-page-node-id="hnwAi5KdRw2S5h0cfBzPsR">集中配置 + 预设 + 校验日志（本轮完成）</td><td data-page-node-id="hvvjEFGfVkG3AmnydLtETQ">低（默认零行为变化）</td><td data-page-node-id="aMDd1232hhjueZCU2CMibL"><span class="tag p0" data-page-node-id="h7aKd8sviOXO0cZAnsKTAy">P0 已完成</span></td></tr>
+    <tr data-page-node-id="TDEHbXLVNKvsi234SAwlqp"><td data-page-node-id="zPUrlhP7BapANvBCqGeBTg">批量 / 无人值守</td><td data-page-node-id="hACrbtbkZn4ZMk5WclSu6C">图纸清单批量、断点、汇总</td><td data-page-node-id="nyuwXr5otNyzuUw9Rh15sb">batch_draw.py（本轮完成）</td><td data-page-node-id="z8yuJ8jf4mvASyh6cHCWgh">低（独立脚本，不改生产链）</td><td data-page-node-id="YaHwLZbG7MelrdhNesYCe3"><span class="tag p0" data-page-node-id="WXRBB75HAIzEEKbEc9qk2L">P0 已完成</span></td></tr>
+    <tr data-page-node-id="bQgM1cLsCiA79qsYgDhWbi"><td data-page-node-id="c3DAAEe7CuLJr2b3qcfWcE">工程版本分叉</td><td data-page-node-id="tFHpPzb4WmT3Vyd9LZxCYJ">单一发布线</td><td data-page-node-id="O7q3c4OKE9y7gjbD8OkBHv">确认主工程 → 合并/同步 → 重编译部署</td><td data-page-node-id="VdBFlFyjRSZxGmqRnhJL3I">高（改错工程=白干）</td><td data-page-node-id="xUkDdzXzeP1DkW0zNsPLUV"><span class="tag p1" data-page-node-id="FAZJIh5TvcASD89rTQJ8RL">P1 待定</span></td></tr>
+    <tr data-page-node-id="gdKrUn6SwerSCCNkdDP933"><td data-page-node-id="wyCDOiobl4ChLUP11vEcHc">9g 引线未落实 45°</td><td data-page-node-id="2BTCDeSD9ohjAOZU1Sq8LC">标注规范统一</td><td data-page-node-id="g0dP5OjzLyh1ALVqAeuttY">按既定「45° 右上优先」重写 9g 菱形引线</td><td data-page-node-id="gjc4hVV9l2fOCn0RW2S1wQ">中（改变出图效果，需实测）</td><td data-page-node-id="Ne0Xd9bkJlAB6Cvk1B97Ix"><span class="tag p1" data-page-node-id="PPndgLgkBy4x9reVOVVQVa">P1</span></td></tr>
+    <tr data-page-node-id="MafdyhSkPe11Cbvt1mPTfR"><td data-page-node-id="rgjk5KTPDTMlobwMhYqZaZ">出图质检闭环</td><td data-page-node-id="TR9AhVlbdh5ER23hmdqmCW">图纸内容无需人工修改</td><td data-page-node-id="W18FB7ajytqRWngNPa1vfH">出图后扫描标注越界/重叠/缺项，产出质检报告</td><td data-page-node-id="7jhkurm2zeb4tO4cC0hjRa">中（需 PDMS 元素遍历）</td><td data-page-node-id="bDa9BAbYxuMmJmBnldbyel"><span class="tag p1" data-page-node-id="Ycml4EiwGYGUOYVvN7DKbw">P1</span></td></tr>
+    <tr data-page-node-id="xhjt09cNaExTf507bJCm2K"><td data-page-node-id="aKSbCrOftp1bhMYiNKA5sN">图纸类型覆盖</td><td data-page-node-id="Jai5DNNFpPOGSaadX7KLbn">孔洞/仪表条件/桥架/轴测等</td><td data-page-node-id="w2XvQ5GNS3BZ4R5pM5lAB8">优先补孔洞条件图、仪表条件图（复用现有图框/标注体系）</td><td data-page-node-id="iIgYHR8wrgfIMrGowA1nQN">高（需模型数据支撑）</td><td data-page-node-id="GWoMPycAESI8Dj2dp3T8Rq"><span class="tag p2" data-page-node-id="1PLs6ebPMYFiXDfHVXG4b8">P2</span></td></tr>
+    <tr data-page-node-id="smV5mEQqidkR4NFeJUBKqm"><td data-page-node-id="zXxLp0cPsU6uIVhPL4RPND">线宽落到 STYL</td><td data-page-node-id="TxcU4Fe0EW06L0mOpxwFhA">线型宽度分级</td><td data-page-node-id="RgR9AeUXkNAR0lwUEefeEg">把 0.7/0.5/0.25/0.2 映射到 Draft STYL 笔表</td><td data-page-node-id="ByFMchnAFn61eWF5z0BzlL">中（PDMS 线型名实证）</td><td data-page-node-id="uCDuU4YIR4xbNN6MlGdblY"><span class="tag p2" data-page-node-id="HhhkP60InnZ8JqEPiyJWwi">P2</span></td></tr>
+    <tr data-page-node-id="qubrGRYGGdENodImJac1Vg"><td data-page-node-id="EaDgoLa27AjFji43uIyFxu">图框/标题栏模板化</td><td data-page-node-id="izqYrzUbHLXFw4fL9pCsHj">自定义 CAD 图框</td><td data-page-node-id="jviYFU53mhBDBGBM2k53UP">模板文件 + 标题栏字段绑定</td><td data-page-node-id="0h5YfMHJap04Xl5fKcnUGL">中</td><td data-page-node-id="MZ5Q7DhQOdxGUDekNw7rno"><span class="tag p2" data-page-node-id="GdEL3mGbnnlPqcE7gGQ8Bu">P2</span></td></tr>
+  </table>
+</section>
+
+<section data-page-node-id="urVRVQu4ATY8iJZbjtd94M">
+  <h2 data-page-node-id="ZSLyV8IYGvAjQ7HAtMCpWw">4. 本轮落地明细</h2>
+  <h3 data-page-node-id="LtzlLXRV4y8tNSQOL4d5Lm">4.1 出图规范集中配置（drawingStandard.cs）</h3>
+  <ul data-page-node-id="BOSd1J4hoazknPAZlB3fm0">
+    <li data-page-node-id="7C2371KDVjiBoD97ns7A7t">预设：<code data-page-node-id="ItUvLaBkag3wPUCT34eeAC">project</code>（项目现状，字高 2.5 / A0 / 1:50 / 45°→135°，<b data-page-node-id="uPmJzK3iMvFN76i4pvUnh8">零行为变化</b>）、<code data-page-node-id="7PH6ORMwLbISH59YlBJ24V">HG20519</code>（A1 / 字高 5·3.5·3.5·7 / 线宽 0.7·0.35·0.2 / 长仿宋）、<code data-page-node-id="MxbCe3d4Blg2JtHodggrN4">SH3052</code>（线宽 0.7·0.5·0.25）。</li>
+    <li data-page-node-id="e4EUt7bXqOjD5lx1RoX8CE">参数覆盖（每次 op 生效，互不串值）：<code data-page-node-id="6On8vxWIw4co3ip3bpB4KG">standard</code>、<code data-page-node-id="TITlO6oCTflrK9wN29Y6uC">frameSize</code>、<code data-page-node-id="HeeTDmXJ2Y1IbWtgrE45E8">stdScaleDen</code>、<code data-page-node-id="bWeCMAG6KC3WacnYWJxJtE">textHeight</code>、<code data-page-node-id="GSOKQLhN7vBLFeEDSeSuge">dimTextHeight</code>、<code data-page-node-id="RqX0AJlsA3LAH5mwaGx3v8">tableTextHeight</code>、<code data-page-node-id="PQUHy3XZzA41DDzCGlJ9nO">titleHeight</code>、<code data-page-node-id="xrzysCjqJqHLSBlVCSJmZr">lineHeavy/lineMid/lineThin</code>、<code data-page-node-id="n8PSNP0OBMDqE9EqoQQ0Qg">leaderAngle/leaderAltAngle/leaderPrefer</code>、<code data-page-node-id="UUtsjgawjc4299hoqxI6T7">font</code>、以及 15 个 <code data-page-node-id="CFVR17DjCSxMB46bZkqYOr">layer*</code> 图层名/色/线型覆盖键。</li>
+    <li data-page-node-id="wrBBQ6WjD2DuDChVPmCr08">合规校验 <code data-page-node-id="SDPpN4fuZVcKf1phTujkXK">Validate()</code>：字高下限、A0/A1 字高、线宽三档区间与大小关系、常用比例、45/135 引线、图幅；全部只写 <code data-page-node-id="W3oyTJi39N4fSAIygFxdZS">[STD-WARN]</code> 日志，<b data-page-node-id="FXDKvlU9soNiKdw3hWwhVQ">不中断出图</b>。</li>
+    <li data-page-node-id="EIX3a2qPv19SLqdlK1E0nE">接入点：<code data-page-node-id="VnvuZjrRLH9AnLMRZDbfCb">headlessDrawing.cs</code> 的 CreateDrawing / ReplaceSymbols 开头写 <code data-page-node-id="HB3eNgvO71V30L1EY5YF6C">[STD]</code> 摘要与告警；9j 引线角度改走 <code data-page-node-id="lrPXkJLLxTXzv6pIh0dLgo">LeaderAngles()</code>（默认仍是 45/135）；<code data-page-node-id="WPIGtUtja2KUvuXxhMoobO">layerManager.cs</code> 层名/色/线型/CHEI 走标准（默认与旧值完全一致）。</li>
+    <li data-page-node-id="dJkc8tGaVMvHD1nLvBZNLE">边界说明：线宽目前<b data-page-node-id="pHUrZ2uliwMGYd4yMmxKqb">只记录与校验</b>，不推入 PDMS STYL/pen 表——直接改会改变现有出图效果，留到 P2 实测后再接。</li>
+  </ul>
+  <p class="small" data-page-node-id="IpVe795UYvdjPxey06jzXS">用法示例：出图参数里加 <code data-page-node-id="p6A45C5zOOHmEiOl3aIHmi">{"standard":"HG20519"}</code> 或 <code data-page-node-id="K4mWVy6FlzFznYigC8o5JI">{"standard":"SH3052","textHeight":"5","leaderPrefer":"left"}</code>；op 日志会打印 <code data-page-node-id="bNcEZkN3nobZMZXZPFDMdb">[STD] preset=...</code> 作为无人值守证据。</p>
+
+  <h3 data-page-node-id="LiXAlcONKPiEPL4rlt0wQr">4.2 批量出图驱动（bridge/batch_draw.py + batch_jobs.example.json）</h3>
+  <ul data-page-node-id="6K4Hm7EJkipJppg4b8lh8R">
+    <li data-page-node-id="XlV8G0qXIW84qBEyTRXds5">复用现有 <code data-page-node-id="fi0cpPkkbCTM1lbvCZfynb">wizard.pipeline</code>（replace_symbols → SAVEWORK → export_pdf → 黑白 → 预览），<b data-page-node-id="4Eaxov7lWSWCmp0UDkTYws">不改生产链代码</b>。</li>
+    <li data-page-node-id="jSshOGRiNeyFBS4MK1C8dN">关键设计：每张图临时把 <code data-page-node-id="rJnknC8QUNoagKox32foPp">wizard.OUTDIR</code> 指向自己的 <code data-page-node-id="kK57yn6HwME2vHugap2AwW">work/&lt;job&gt;/</code>，避开单图流水线固定 <code data-page-node-id="YhzJ3yx0HUpjf0F1zC1elC">preview.pdf</code> 互相覆盖/取错 PDF 的坑；完成后 PDF 归档到 <code data-page-node-id="Fn8tlnBmHvhNveXKCOUXbl">pdf/&lt;job&gt;.pdf</code>、日志到 <code data-page-node-id="TYRCrVtOBl3BQrJDU3ffbT">logs/&lt;job&gt;.log</code>。</li>
+    <li data-page-node-id="NvnyieivCWzzGWh1S5KEYH">状态 <code data-page-node-id="IWb1IIKCK7cYMuwJCrgLpd">state.json</code> 每图即时落盘；<code data-page-node-id="vDl7OKFmfAyoMc0ZlLI9rP">--resume</code> 跳过成功图、<code data-page-node-id="j5LXUDheMHKFRm4JNMYbAE">--retry N</code> 重跑失败图、<code data-page-node-id="AB9VSq7kuPt6j3Nolq8PUT">--only</code> 指定子集、<code data-page-node-id="WZGdgzrH9aFcP2ehHDSbtC">--dry-run</code> + <code data-page-node-id="ixrKf0vMzRZzNOUzs4zzVw">--fail</code> 离线演练。</li>
+    <li data-page-node-id="1G1huYSawhCtJBTX8zps9j">批次产出：<code data-page-node-id="i9CaNsAcBGAnSxMSQ9o9ys">report.md</code>（人读）/ <code data-page-node-id="iw4Tj76GHQ6fSHZ1SUYHfB">report.json</code>（机器读）/ pdf / logs / work。</li>
+  </ul>
+  <p class="small" data-page-node-id="ESnI1p1Q2BE4rUxtZqF8wc">真实运行：<code data-page-node-id="g4pNjxvQ5DAO2mBmpPWqpG">python bridge/batch_draw.py bridge/batch_jobs.example.json --out D:\pdmsAgent\bridge\batch_out</code>（示例清单的 view/sheet/elements 是占位符，需替换；PDMS + bridge 必须在线）。</p>
+
+  <h3 data-page-node-id="wfGsmb9ZBGv9bNCbk4Ihvl">4.3 变更文件清单</h3>
+  <table data-page-node-id="8AN5eNdXjdyTjAcHp7CGDE">
+    <tr data-page-node-id="XkFo8yQ2FVKRIUKUXpohCp"><th data-page-node-id="laCbCuLv8rsTGYZeHEkVET">文件</th><th data-page-node-id="Y4eYM9aZwbFGYjjlrQQNFW">动作</th></tr>
+    <tr data-page-node-id="hxHv2U9ARjz7vxcLD5Rw9w"><td data-page-node-id="fhXZF7f5FyYGgUUhXtOQRm"><code data-page-node-id="sQaZq5eBNoQPEPcPa2MLqI">src/drawingPDMS/drawingStandard.cs</code></td><td data-page-node-id="PZGDtqlCP2jFUAFDTahPsV">新增（规范预设 / 覆盖 / 校验 / 摘要）</td></tr>
+    <tr data-page-node-id="oDX7qhebTtpx9JQXCDgwAX"><td data-page-node-id="H56AUqMSB9Qt7irBtu482A"><code data-page-node-id="1JUkxpmv1inPkGY485cx85">src/drawingPDMS/layerManager.cs</code></td><td data-page-node-id="DaMOOmVbh7eCpU9fSfDvzE">图层名/色/线型/CHEI 改走标准（默认值不变）</td></tr>
+    <tr data-page-node-id="xgSZwWkKY7VcaIF2oL7KjQ"><td data-page-node-id="5LEJbw8jwABQ24dynpTXFm"><code data-page-node-id="RLS7slBcCBAuB7tP5Wn53a">src/drawingPDMS/headlessDrawing.cs</code></td><td data-page-node-id="HCT3TdQTS75OmJOcCq6kYb">CreateDrawing / ReplaceSymbols 写标准日志与告警；9j 引线角度参数化</td></tr>
+    <tr data-page-node-id="sbt1UlkYyydBwzNAXg1XHS"><td data-page-node-id="03QTQJdgLSQY1lcmaxc2gR"><code data-page-node-id="GFdzJnmRtGLl0DavpZlLw2">src/drawingPDMS/drawingPDMS.csproj</code></td><td data-page-node-id="4NhEf4Xy5nBA1bGAG4BAPG">登记新 .cs（逐项 Compile Include，漏登记会 CS0103）</td></tr>
+    <tr data-page-node-id="I101Ep1Ld3DcWEE2i0SHeV"><td data-page-node-id="Vqd4o6qEdjbMBmRmVE1voh"><code data-page-node-id="kRHh8OMrJsDKbDsi0l6rdz">bridge/batch_draw.py</code>、<code data-page-node-id="zqoDmsCKBiVgOkezFByuGI">bridge/batch_jobs.example.json</code></td><td data-page-node-id="BxHEYeUfBI8MX5AHYMeOg2">新增（批量驱动 + 示例清单）</td></tr>
+    <tr data-page-node-id="HvH2SkED5MCBosy5aIdCNa"><td data-page-node-id="RLhPElYqS0ZwLV6alXR0ox"><code data-page-node-id="lrnrq4DWNaH8L3nnUU0kA3">reports/wt-draw-benchmark.html</code></td><td data-page-node-id="aHyb9L51VRDtMd7SB6Tadl">本报告</td></tr>
+  </table>
+</section>
+
+<section data-page-node-id="TGJURUPuN3tLBWiOIO1Q4H">
+  <h2 data-page-node-id="KwPW6Grpi94FnXfDbAP01H">5. 重要风险：工程版本分叉</h2>
+  <table data-page-node-id="W5B1njGxfOoGj7rXQ7woec">
+    <tr data-page-node-id="jy3BqMG4HqDcq6WCElMDjW"><th data-page-node-id="drKGATGIFmd6VG4f6zPeeX">副本</th><th data-page-node-id="4XGo1n1hzOAHEgZJ4Yeixv">最后修改</th><th data-page-node-id="CKxO4aTYnoqyS7gXTDhobP">headlessDrawing.cs</th><th data-page-node-id="cggBhT9NXT14EAOtGIlef4">11 月新增能力</th></tr>
+    <tr data-page-node-id="Dh2OA3Tu3dIsHUHL8K3u39"><td data-page-node-id="7t5xDmgRk8ySHH79D6fPzd"><code data-page-node-id="R5aVPLxEjO4TKcnhH4FMoj">D:\repos\pdmsDrawing</code>（当前工作区 / 沉淀版）</td><td data-page-node-id="n23Fs0F6SaDzaW5RxJ8AAB">10-28 18:42</td><td data-page-node-id="PeDG6PUJo1CFmt3FFH3e4v">397 KB / 5504 行</td><td data-page-node-id="1OffO8IXtXYceBsdqs7cAR">无（本轮改动落在此处）</td></tr>
+    <tr data-page-node-id="Me2GaZ6REI6rcZLSNkziPC"><td data-page-node-id="aiP3GFSyzPr3O5BWCjkIi2"><code data-page-node-id="cmnzQycNslc5jcDb9kwEqv">D:\repos\drawingPDMS</code></td><td data-page-node-id="UOSaZjHv1DclSwFzi8Ic5O">11-06 21:15</td><td data-page-node-id="Q8glgijLV2zwC21GPSbycB">646 KB / 约 8000 行</td><td data-page-node-id="TCTaod84FvQYD7SMgE68rF">管口方位图与设备管口表、原比例分页、自动缩比例开关、ReplaceSymbols 批处理提速、DrawingWizard、DXF 块化、IDLIST 巡检</td></tr>
+  </table>
+  <div class="callout" data-page-node-id="WF21JxFkd0GkPehDpFUmWj">两版是同源分叉（文件名/函数高度重合），不是维图商业程序源码。11-06 版注释里有「参考标准管口方位图优化」，说明对标工作已在那条线上推进。本轮的新文件是可直接复制的独立模块，3 处接入点（CreateDrawing / ReplaceSymbols / 9j）与 layerManager 的改法也已在本报告列明，迁移成本很低。</div>
+</section>
+
+<section data-page-node-id="y4MWSbWIHEg6MMqnM8UriH">
+  <h2 data-page-node-id="UawkO7PAZWn4NE7DYHSLh9">6. 部署与下一步</h2>
+  <div class="callout good" data-page-node-id="1vr4Y8GipH7Qi46HQSMxXi"><b data-page-node-id="WgEoCkykHLo8lEyjikoHbU">本轮刻意没做部署：</b>编译输出重定向到 <code data-page-node-id="fR04EkD9hNqCHJT64Q2vKQ">D:\repos\pdmsDrawing\build_check\</code>，没有覆盖 <code data-page-node-id="OAgx0eODjbpJmKm1VA7BcH">D:\AVEVA\Plant\PDMS12.1.SP4\drawingPDMS.dll</code>。要生效需：确认主工程 → 重编译（Debug 直出 PDMS 根目录或手工拷贝）→ 关闭并重启 PDMS 模块 → 实机出一张图核对 <code data-page-node-id="vFOOYsEoRkgH7TYZTRn4aj">[STD]</code> 日志与 45° 引线。</div>
+  <p data-page-node-id="yOhUD36CewOMaDalPyFC5b"><b data-page-node-id="aVBWoQR4qsaz1MsE9EG0vc">下一轮请选一个主攻方向：</b></p>
+  <ul data-page-node-id="X7owdlY9D67dFiybnSRTgI">
+    <li data-page-node-id="FfEDkknfi5Z8eypBoJECeQ"><b data-page-node-id="ez98pFARPnfcCK9AW5mcRn">A</b>：把本轮改动迁移到 11-06 主工程并实机验证（推荐先做，避免继续在分叉上堆功能）</li>
+    <li data-page-node-id="ZHGNagoYhK9gBl5EwWL14W"><b data-page-node-id="tbt3tDOBEDI2qy9RnnmNe5">B</b>：出图质检闭环（标注越界/重叠/缺项自检 + 批次质检报告），对准「图纸无需人工修改」</li>
+    <li data-page-node-id="BpsRsxjauv0bq8RDZG8ITp"><b data-page-node-id="QLWG8Ciq3xb0sLNfuP8DBI">C</b>：图纸类型扩展（孔洞条件图 / 仪表条件图），补齐与维图的图纸覆盖面差距</li>
+    <li data-page-node-id="Cbpl5mTFKY8ewDCcEkatjo"><b data-page-node-id="6OZWayXQ4gKwPrnICSA7DZ">D</b>：9g 菱形引线修成真 45°，并把规范线宽映射到 Draft STYL 笔表</li>
+  </ul>
+  <p class="small" data-page-node-id="H94QjBX6gdrqfvwbiN7Z24">资料来源：软服之家 WT-DRAW 产品页、维图 E3D PDMS 出图软件页、HG/T 20519.1-2009 / 20519.4-2009 / SH/T 3052-2014 公开条文。维图部分为公开产品描述，非逆向工程数据。</p>
+</section>
+
+</div>
+</body>
+</html>

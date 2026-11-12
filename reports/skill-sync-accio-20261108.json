@@ -1,0 +1,151 @@
+{
+  "generated": "2026-11-08 11:10:21",
+  "dry": false,
+  "source": "C:\\Users\\Nie\\.workbuddy\\skills",
+  "targets": [
+    "D:/skill",
+    "C:\\Users\\Nie\\.accio\\accounts\\1796501114\\skills",
+    "C:\\Users\\Nie\\.accio\\accounts\\7100633559\\skills",
+    "C:\\Users\\Nie\\.accio\\accounts\\1794603983\\skills",
+    "C:\\Users\\Nie\\.accio\\accounts\\7099707696\\skills"
+  ],
+  "stats": {
+    "new": 824,
+    "diff": 10,
+    "same": 77,
+    "extra": 3,
+    "preserved": 4,
+    "files": 838
+  },
+  "verify_failed": [],
+  "retired": [],
+  "backup": "D:\\repos\\pdmsDrawing\\skill-archive\\accio-presync-20261108.zip",
+  "skills": [
+    "browser-automation-cdp",
+    "browser-skill",
+    "dxf-text-mask-draworder",
+    "egobrowser",
+    "mcp-stdio-compat",
+    "pdf-vector-to-dxf",
+    "pdms-bridge",
+    "pdms-database",
+    "pdms-dialog",
+    "pdms-equip-modeling",
+    "pdms-expert",
+    "pdms-iso",
+    "pdms-nozzle-attrs",
+    "pdms-pipe-create",
+    "pdms-pml",
+    "pdms-run-macro",
+    "pdms-spec-bolting-gasket",
+    "pdms-uda-udet-mdb",
+    "pdms-vision",
+    "pdms-zd-styp-mapping",
+    "skill-merge-pack"
+  ],
+  "per_target": {
+    "skill": {
+      "target": "D:/skill",
+      "new": 128,
+      "diff": 5,
+      "same": 48,
+      "extra": 2,
+      "skills": 21
+    },
+    "account-1796501114": {
+      "target": "C:\\Users\\Nie\\.accio\\accounts\\1796501114\\skills",
+      "new": 151,
+      "diff": 5,
+      "same": 25,
+      "extra": 0,
+      "skills": 21
+    },
+    "account-7100633559": {
+      "target": "C:\\Users\\Nie\\.accio\\accounts\\7100633559\\skills",
+      "new": 183,
+      "diff": 0,
+      "same": 0,
+      "extra": 0,
+      "skills": 21
+    },
+    "account-1794603983": {
+      "target": "C:\\Users\\Nie\\.accio\\accounts\\1794603983\\skills",
+      "new": 179,
+      "diff": 0,
+      "same": 4,
+      "extra": 1,
+      "skills": 21
+    },
+    "account-7099707696": {
+      "target": "C:\\Users\\Nie\\.accio\\accounts\\7099707696\\skills",
+      "new": 183,
+      "diff": 0,
+      "same": 0,
+      "extra": 0,
+      "skills": 21
+    }
+  },
+  "overwritten": [
+    "skill/pdms-expert",
+    "skill/pdms-pml",
+    "skill/pdms-zd-styp-mapping",
+    "account-1796501114/pdms-expert",
+    "account-1796501114/pdms-pml",
+    "account-1796501114/pdms-zd-styp-mapping"
+  ],
+  "extras": [
+    "skill/pdms-pml (1 files)",
+    "skill/pdms-vision (1 files)",
+    "account-1794603983/pdms-vision (1 files)"
+  ],
+  "preserved": [
+    "pdms-run-macro/SKILL.md",
+    "pdms-spec-bolting-gasket/SKILL.md"
+  ],
+  "retired_removed": {
+    "at": "2026-11-08 11:21",
+    "confirmed_twice": true,
+    "backup": "none (user requested)",
+    "dirs": [
+      {
+        "path": "D:\\skill\\pdms-dialog-autoclose",
+        "files": 1,
+        "method": "永久删除",
+        "recoverable": false
+      },
+      {
+        "path": "D:\\skill\\pdms-pml-course",
+        "files": 20,
+        "method": "永久删除",
+        "recoverable": false
+      },
+      {
+        "path": "D:\\skill\\pdms-bridge-probe",
+        "files": 1,
+        "method": "永久删除",
+        "recoverable": false
+      },
+      {
+        "path": "C:\\Users\\Nie\\.accio\\accounts\\1796501114\\skills\\pdms-dialog-autoclose",
+        "files": 1,
+        "method": "回收站",
+        "recoverable": true
+      },
+      {
+        "path": "C:\\Users\\Nie\\.accio\\accounts\\1796501114\\skills\\pdms-pml-course",
+        "files": 20,
+        "method": "回收站",
+        "recoverable": true
+      },
+      {
+        "path": "C:\\Users\\Nie\\.accio\\accounts\\1796501114\\skills\\pdms-bridge-probe",
+        "files": 1,
+        "method": "回收站",
+        "recoverable": true
+      }
+    ],
+    "total_files": 44,
+    "verified_all_gone": true,
+    "canonical_intact_in_all_5_targets": true
+  }
+}

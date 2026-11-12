@@ -1,0 +1,46 @@
+{
+  "name": "TWC-CONDITION 示范批次（占位参数，运行前按项目替换 view/sheet/elements）",
+  "defaults": {
+    "standard": "HG20519",
+    "scaleDen": "50",
+    "annotate": "true",
+    "drawGrid": "1",
+    "drawEquip": "1",
+    "drawStruct": "0",
+    "backs": "/DRA/MAS/BACKS/MET/A0",
+    "rrsf": "/DRA/MAS/H&S/RULESETS/View1",
+    "hrsf": "/DRA/PRJ/HRUL/GEN/Hatch-None"
+  },
+  "jobs": [
+    {
+      "name": "01-管道布置图-A区",
+      "params": {
+        "view": "=16385/1249",
+        "sheet": "=16385/1242",
+        "drawPipe": "1",
+        "newSheet": "1",
+        "elements": "<替换为出图元素名或 ZONE 引用>"
+      }
+    },
+    {
+      "name": "02-设备布置图-A区",
+      "params": {
+        "view": "=16385/1249",
+        "sheet": "=16385/1242",
+        "drawPipe": "0",
+        "newSheet": "1",
+        "equipZones": "<替换为设备 ZONE 名>"
+      }
+    },
+    {
+      "name": "03-管道布置图-B区",
+      "params": {
+        "view": "=16385/1249",
+        "sheet": "=16385/1242",
+        "drawPipe": "1",
+        "newSheet": "1",
+        "elements": "<替换为 B 区元素名>"
+      }
+    }
+  ]
+}

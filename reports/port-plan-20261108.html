@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>PDMS 桥端口分配表 · 2026-11-08</title>
+<style>
+  :root{--bg:#f5f7f9;--card:#fff;--line:#e3e8ed;--ink:#1c2733;--sub:#5b6b7c;--draw:#2563a6;--drawbg:#e8f1fb;--sup:#2f7d5b;--supbg:#e7f4ec;--warn:#b4531a;--warnbg:#fff2e8}
+  *{box-sizing:border-box}
+  body{margin:0;padding:28px;background:var(--bg);color:var(--ink);font:14px/1.65 -apple-system,"Segoe UI","Microsoft YaHei",sans-serif}
+  .wrap{max-width:940px;margin:0 auto}
+  h1{font-size:22px;margin:0 0 4px}
+  .lead{color:var(--sub);margin:0 0 22px;font-size:13px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:20px 22px;margin-bottom:16px}
+  h2{font-size:15px;margin:0 0 14px;padding-left:10px;border-left:3px solid var(--draw)}
+  .axis{display:flex;align-items:stretch;height:56px;border-radius:6px;overflow:hidden;border:1px solid var(--line);margin:6px 0 10px;font:600 12px/1.2 Consolas,monospace}
+  .seg{display:flex;flex-direction:column;justify-content:center;align-items:center;color:#fff}
+  .seg small{font-weight:400;opacity:.85;font-size:10px;margin-top:3px}
+  .d{background:var(--draw);flex:10}.s{background:var(--sup);flex:21}
+  .axis-note{display:flex;justify-content:space-between;color:var(--sub);font:12px Consolas,monospace}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+  th{background:#f8fafb;color:var(--sub);font-weight:600;font-size:12px}
+  code{font:12.5px Consolas,monospace;background:#f1f4f7;padding:1px 5px;border-radius:3px}
+  .port{font:600 13px Consolas,monospace}
+  .pd{color:var(--draw)}.ps{color:var(--sup)}
+  .tag{display:inline-block;padding:1px 7px;border-radius:10px;font-size:11px;font-weight:600}
+  .tag.d{background:var(--drawbg);color:var(--draw)}.tag.s{background:var(--supbg);color:var(--sup)}
+  ul{margin:6px 0 0;padding-left:20px}li{margin:5px 0}
+  .warn{background:var(--warnbg);border-left:3px solid var(--warn);padding:10px 14px;border-radius:4px;color:#7a3d12;font-size:13px;margin-top:12px}
+  .foot{color:var(--sub);font-size:12px;text-align:center;margin-top:18px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>PDMS 桥端口分配表</h1>
+  <p class="lead">2026-11-08 定稿 · 原则：两族分开、每个启动脚本一个专属口、不共用不靠顺延抢</p>
+
+  <div class="card">
+    <h2>端口分族（零重叠）</h2>
+    <div class="axis">
+      <div class="seg d">18753 – 18762<small>绘图桥族 · drawingPDMS / PdmsBridge</small></div>
+      <div class="seg s">18763 – 18783<small>支架桥族 · SupportBridge</small></div>
+    </div>
+    <div class="axis-note"><span>18753</span><span>18762│18763</span><span>18783</span></div>
+    <ul>
+      <li><b>绘图桥族不设任何环境变量覆盖</b>：保留 MCP 默认 <code>18753</code> / paragon <code>18754</code>，drawingPDMS 内嵌桥被占时最多 +9 顺延到 18762，永远出不了这一族。</li>
+      <li><b>支架桥族每个脚本一个固定口</b>：SupportBridge 的顺延（+20）也只在本族内，不会掉回 18753。</li>
+      <li>两族之间留 <code>18762 / 18763</code> 一条硬边界，<code>support_hello</code> 身份校验仍作为双保险。</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>启动脚本 → 端口对照</h2>
+    <table>
+      <thead><tr><th>启动脚本（桌面）</th><th>模块 / 项目</th><th>绘图桥</th><th>支架桥</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td><code>pdms - WPC(Design).bat</code></td><td>Design / WPC</td><td class="port pd">默认族</td><td class="port ps">18766</td><td><span class="tag s">专属</span></td></tr>
+        <tr><td><code>PDMS12.1.sp4 Design.bat</code></td><td>Design / SAM</td><td class="port pd">默认族</td><td class="port ps">18767</td><td><span class="tag s">专属</span></td></tr>
+        <tr><td><code>pdms - WPC(Draw) .bat</code></td><td>Draft / WPC</td><td class="port pd">默认族</td><td class="port ps">18765</td><td><span class="tag s">专属</span></td></tr>
+        <tr><td><code>pdms - SWX(Para) .bat</code></td><td>Paragon / SWX</td><td class="port pd">默认族</td><td class="port ps">18764</td><td><span class="tag s">专属</span> 保留 paragonbridge 结果目录</td></tr>
+        <tr><td><code>C:\pdmsAgent\bridge\launch_*.bat</code></td><td>桥接 / MCP 会话</td><td class="port pd">18753 默认</td><td class="port ps">18763 默认</td><td><span class="tag d">DLL 默认</span> 不改脚本，保 MCP 兼容</td></tr>
+      </tbody>
+    </table>
+    <div class="warn">脚本里<b>只设 <code>SUPPORT_BRIDGE_PORT</code></b>，不设 <code>PDMS_BRIDGE_PORT</code> —— Draft 模块里 drawingPDMS 内嵌桥和独立 PdmsBridge.dll 都读后者，硬设反而会让两个绘图桥互抢。注释全英文（脚本注释禁中文）。</div>
+  </div>
+
+  <div class="card">
+    <h2>根因与配套改动</h2>
+    <ul>
+      <li><b>根因</b>：<code>pdms - SWX(Para) .bat</code>（11-02 21:56 建）写了 <code>set SUPPORT_BRIDGE_PORT=18753</code>，把支架桥拽到绘图桥主口。HKCU/HKLM 无此变量，全机唯一覆盖源。部署 DLL 默认其实已是 <b>18763</b>（IL <code>ldc.i4 18763</code> 实证），11-05 源码也改了默认 —— bat 漏改才拖到 11-08 爆。</li>
+      <li><b>PdmsDrawStudio</b>：<code>FindDrawingBridge</code> 扫描收窄为 18753–18763（原 18753–18770），默认图型改「管道布置图」，每个 op 前用 <code>support_hello</code> 自动认绘图桥（14e）。</li>
+      <li><b>SupportStudio</b>：扫描扩为 18763–18783（原只扫 18763），清理 18753/18754/18755 过时文案。</li>
+      <li><b>发布</b>：两 EXE <code>dotnet publish -c Release</code> 零错误；PdmsDrawStudio 同步到 <code>publish_14m</code>，SupportStudio 旧版备份 <code>.bak-20261108</code>。IL 校验：绘图 EXE 已无 18770，支架 EXE 有 18783。</li>
+      <li><b>校验</b>：4 个脚本端口零重复、无一落入绘图族、无残留 <code>set PDMS_BRIDGE_PORT</code>。<code>pdms.bat</code> 一次只拉一个模块，脚本层分口即够，无需重编译桥 DLL。</li>
+    </ul>
+    <div class="warn"><b>生效条件</b>：改 bat 只对下次启动生效。当前 PDMS（pid 20648）仍占着 18753 的旧支架桥 —— 必须关掉重启 PDMS，再开新 EXE 出一版验证。实机效果未验证。</div>
+  </div>
+
+  <div class="foot">PDMS大拿 · 证据优先：只信 support_hello 回包、IL 立即数、脚本回读</div>
+</div>
+</body>
+</html>

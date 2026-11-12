@@ -1,0 +1,9 @@
+-- area.pmlfnc —— 自定义函数：计算矩形面积（课程 P5）
+-- 文件名必须与函数名一样，后缀小写 pmlfnc
+-- 存放：Pmllib/NewPml/functions/area.pmlfnc
+-- 使用：Pml Rehash All 之后  !MyArea = !!Area(6,4)
+
+define function !!Area( !Length is REAL, !Width is REAL ) is REAL
+!Area = !Length * !Width
+return !Area
+Endfunction

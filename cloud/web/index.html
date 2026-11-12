@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="zh" data-page-node-id="kBETdtAQOHYG1LsY7hdRdW">
+<head data-page-node-id="QlD3C97dn9EJ0hEohLXBK7">
+<meta charset="utf-8" data-page-node-id="LtZBZSnsOlYn7WFyou9q3B">
+<meta name="viewport" content="width=device-width,initial-scale=1" data-page-node-id="bUjEqbRGj3e9bYaXxZXKiS">
+<title>pdmsDrawing 云端出图引擎</title>
+<style>
+:root{
+ --ink:#1c2024; --sub:#6b7280; --line:#eceef1; --paper:#f7f8fa;
+ --card:#fff; --orange:#ff6b35; --orange-d:#e8551f; --orange-soft:#fff1ea;
+ --ok:#16a34a; --bad:#dc2626;
+ --mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
+ --sans:"PingFang SC","Microsoft YaHei",system-ui,-apple-system,sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--paper);color:var(--ink);font-size:14px;line-height:1.5}
+
+/* ---- topbar ---- */
+.topbar{position:sticky;top:0;z-index:30;background:rgba(255,255,255,.94);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.topbar .in{max-width:980px;margin:0 auto;padding:0 22px;height:58px;display:flex;align-items:center;gap:14px}
+.logo{display:flex;align-items:center;gap:11px}
+.logo .dot{width:11px;height:11px;border-radius:50%;background:var(--orange);
+  box-shadow:0 0 0 4px var(--orange-soft);flex:none}
+.logo h1{font-size:19px;font-weight:800;letter-spacing:.3px;color:var(--ink);line-height:1.1}
+.logo .sub{font-family:var(--mono);font-size:10px;letter-spacing:1.5px;color:var(--sub);text-transform:uppercase}
+.topact{margin-left:auto;display:flex;align-items:center;gap:10px}
+.cst{display:inline-flex;align-items:center;gap:7px;font-size:13px;color:var(--sub);
+  background:#f1f3f5;border-radius:20px;padding:6px 13px}
+.cst .dot{width:8px;height:8px;border-radius:50%;background:#cbd0d6;flex:none}
+.cst.on{color:var(--ok);background:#eafaf0}
+.cst.on .dot{background:var(--ok)}
+
+/* ---- nav ---- */
+.nav{max-width:980px;margin:0 auto;padding:0 16px;display:flex;gap:4px;flex-wrap:wrap}
+.nav a{padding:0 15px;height:45px;line-height:45px;font-size:14px;color:var(--sub);
+  text-decoration:none;font-weight:600;cursor:pointer;position:relative;transition:.18s;white-space:nowrap}
+.nav a:hover{color:var(--ink)}
+.nav a.on{color:var(--orange-d)}
+.nav a.on::after{content:"";position:absolute;left:15px;right:15px;bottom:0;height:2px;
+  background:var(--orange);border-radius:2px}
+.nav a.soon-tab{margin-left:auto;color:var(--orange-d)}
+.nav a.soon-tab::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;
+  background:var(--orange);margin-right:7px;vertical-align:1px}
+
+/* ---- layout ---- */
+.wrap{max-width:980px;margin:22px auto 72px;padding:0 22px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;
+  padding:22px 24px;margin:0 0 16px;box-shadow:0 1px 3px rgba(20,24,28,.04);transition:box-shadow .2s}
+.card:hover{box-shadow:0 4px 16px rgba(20,24,28,.07)}
+.card>h2{display:flex;align-items:baseline;gap:10px;margin-bottom:18px;font-size:15px;font-weight:800;color:var(--ink)}
+.card>h2 .en{font-family:var(--mono);font-size:10px;letter-spacing:1.5px;color:var(--orange);text-transform:uppercase;font-weight:600}
+
+/* ---- form ---- */
+.fld{margin:14px 0}
+.fld>label{display:block;font-size:12px;color:var(--sub);margin-bottom:7px;letter-spacing:.3px}
+.frow{display:flex;gap:10px;align-items:center}
+.frow .fld{margin:0;flex:1}
+input[type=text],input[type=password],select,textarea{font-family:var(--sans)}
+input[type=text],input[type=password],select{width:100%;padding:10px 12px;border:1px solid var(--line);
+  border-radius:9px;font-size:13px;background:#fcfcfd;color:var(--ink);transition:.18s}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--orange);box-shadow:0 0 0 3px var(--orange-soft)}
+textarea{width:100%;min-height:56px;border:1px solid var(--line);border-radius:9px;padding:10px 12px;
+  font-size:13px;line-height:1.7;resize:vertical;background:#fcfcfd;color:var(--ink)}
+.btn{background:#fff;color:var(--ink);border:1px solid var(--line);border-radius:9px;padding:9px 16px;
+  cursor:pointer;font-size:13px;font-weight:600;transition:.18s;white-space:nowrap;font-family:var(--sans)}
+.btn:hover{border-color:var(--orange);color:var(--orange-d)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.sm{padding:7px 12px;font-size:12px}
+.go{width:100%;background:var(--orange);color:#fff;border:0;border-radius:11px;padding:14px;
+  font-size:15px;font-weight:700;letter-spacing:2px;cursor:pointer;margin-top:8px;transition:.18s;
+  box-shadow:0 4px 14px rgba(255,107,53,.28);font-family:var(--sans)}
+.go:hover{background:var(--orange-d)}
+.go:disabled{background:#cbd0d6;box-shadow:none;cursor:not-allowed}
+
+/* ---- check chips ---- */
+.chks{display:flex;gap:10px;flex-wrap:wrap}
+.chk{display:inline-flex;align-items:center;gap:8px;padding:9px 15px;border:1px solid var(--line);
+  border-radius:11px;cursor:pointer;font-size:13px;color:var(--ink);background:#fcfcfd;
+  transition:.18s;user-select:none}
+.chk input{accent-color:var(--orange);width:16px;height:16px}
+.chk:hover{border-color:var(--orange)}
+
+/* ---- badges / hint ---- */
+.badge{font-family:var(--mono);font-size:10px;letter-spacing:1px;color:var(--orange-d);
+  background:var(--orange-soft);border-radius:20px;padding:3px 10px;margin-left:auto}
+.hint{color:var(--sub);font-size:12.5px;margin-top:9px;line-height:1.75}
+.ok{color:var(--ok)}.bad{color:var(--bad)}
+
+/* ---- machines ---- */
+.mrow{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--line);font-size:13px}
+.mrow:last-child{border-bottom:0}
+.mrow .nm{flex:1;font-weight:600;color:var(--ink);letter-spacing:.3px}
+.mrow .mdot{width:8px;height:8px;border-radius:50%;background:var(--ok);flex:none}
+
+/* ---- stages (pipeline) ---- */
+.stages{list-style:none;display:flex;flex-direction:column;gap:0;margin-top:4px}
+.stages li{display:flex;align-items:center;gap:11px;padding:9px 2px;color:var(--sub);
+  font-size:13px;position:relative;transition:.3s}
+.stages li::before{content:"";width:9px;height:9px;border-radius:50%;background:#d7dbe0;flex:none;transition:.3s}
+.stages li.cur{color:var(--ink);font-weight:700}
+.stages li.cur::before{background:var(--orange);box-shadow:0 0 0 4px var(--orange-soft)}
+.stages li.done{color:var(--ok)}
+.stages li.done::before{background:var(--ok)}
+
+/* ---- log / preview ---- */
+#log{background:#1c2024;color:#aef0c8;font:12px/1.7 var(--mono);padding:14px 16px;border-radius:11px;
+  height:185px;overflow-y:auto;white-space:pre-wrap;display:none;margin-top:14px}
+#prev{display:none;text-align:center;margin-top:14px}
+#prev img{max-width:100%;border:1px solid var(--line);border-radius:12px;box-shadow:0 4px 16px rgba(20,24,28,.1)}
+#pdflink{margin-top:12px;font-size:13px}
+#pdflink a{color:var(--orange-d);font-weight:700;text-decoration:none}
+#pdflink a:hover{text-decoration:underline}
+#st{color:var(--ink);font-size:14px;font-weight:800;letter-spacing:.3px}
+
+/* ---- kv (env) ---- */
+.kv{display:flex;gap:14px;padding:11px 0;border-bottom:1px solid var(--line);font-size:13px}
+.kv:last-child{border-bottom:0}
+.kv .k{width:128px;color:var(--sub);flex:none;letter-spacing:.3px}
+.kv .v{color:var(--ink);word-break:break-all}
+
+/* ---- spin ---- */
+.spin{display:inline-block;width:14px;height:14px;border:2px solid var(--orange);
+  border-top-color:transparent;border-radius:50%;animation:sp 1s linear infinite;
+  vertical-align:-2px;margin-right:9px}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+.page{display:none}.page.on{display:block}
+
+@media(max-width:640px){
+ .topbar .in{padding:0 14px;gap:8px}
+ .logo .sub{display:none}
+ .nav a{height:42px;line-height:42px;padding:0 11px;font-size:13px}
+ .wrap{padding:0 14px;margin-top:16px}
+ .card{padding:18px 16px}
+}
+</style>
+</head>
+<body data-page-node-id="G5QiFqPVD65FxRkyjlRXFk">
+
+<header class="topbar" data-page-node-id="MvNHkk79N6mYAdGwAg4uXJ">
+ <div class="in" data-page-node-id="1kYVkU6ok1ETb1zGvNfgNy">
+  <div class="logo" data-page-node-id="Xk0bXDoewDInV7DjOyGhw7"><span class="dot" data-page-node-id="nmbbtVHwoF5QZmM0dbB2i3"></span>
+   <div data-page-node-id="Q6QdU7BPuSuMNgPzxZUass"><h1 data-page-node-id="oOPnqIZuGYeAqq6JY9VEfZ">pdmsDrawing</h1><div class="sub" data-page-node-id="ZbcPSQsmBVNA2vyBo5bMCp">Cloud Draft Engine</div></div>
+  </div>
+  <div class="topact" data-page-node-id="bZyd4C1Z8MVvpPVbMef13S"><span class="cst" id="cst" data-page-node-id="Ns6buBBpNTkyhG4Wtn6Tkq"><span class="dot" data-page-node-id="2v8qFZRHBVqSzWLanbL4pQ"></span>未连接</span></div>
+ </div>
+ <nav class="nav" data-page-node-id="jlqgj5XoqjgBqHEDokp2zI">
+  <a class="on" data-p="draw" data-page-node-id="4tGNWU7lGec3boe0xnnEjz">出图</a>
+  <a data-p="equip" data-page-node-id="qdcvYnpFQ6D1Ey46XGUwtL">建设备</a>
+  <a data-p="ctrl" data-page-node-id="Y1v1FU6xDKZAGrgcf8JoJe">控制台</a>
+  <a data-p="mto" data-page-node-id="AoQghjA0XTzTsMH2GVp9dM">材料表</a>
+  <a data-p="vision">视觉巡检</a> </nav>
+</header>
+
+<div class="wrap" data-page-node-id="lD0WJbXXorTqpfGBin0iDR">
+
+<!-- 连接与机器（全局） -->
+<div class="card" data-page-node-id="4wqylJHeW9w7B0b0izNoSi">
+ <h2 data-page-node-id="G31FM2VFi1hlvJLnfMcOcS">连接与机器<span class="en" data-page-node-id="I06AZI7WGketZVMUi6AHp8">Relay</span></h2>
+ <div class="frow" data-page-node-id="DoD2smf18WtlHdCWNp19YR">
+  <div class="fld" style="flex:1;margin:0" data-page-node-id="zuAUsTiedGSYS7zrtbV4kb">
+   <label data-page-node-id="8lS555MB3N6J7reRK1assS">访问令牌 Token</label>
+   <input id="token" type="password" placeholder="粘贴你的访问令牌" data-page-node-id="TClGhtwNLPKAFJTPImasnk">
+  </div>
+  <button class="btn" onclick="conn()" style="align-self:flex-end;margin-bottom:1px" data-page-node-id="JOdVZgrNpHUVvKmOJX4sqi">连接</button>
+ </div>
+ <div class="hint" data-page-node-id="pGjpQIAtqUAE3x5RTBvgcc">本页连云端中继（ws 同源主机，可用 ?ws=ws://host:port 覆盖）。连接后下方出现在线 PDMS 机器，选一台作为出图机。</div>
+ <div class="hint">新机器接入：<a href="#" onclick="return dlAgent()" style="color:var(--orange-d);font-weight:700">下载一键安装器</a>（先填上方访问令牌）——下载 <b>install_agent.bat</b> 后双击即可，自动装到本机并启动，<b>无需解压</b>，token 已内置。也可 <a href="#" onclick="return dlAgentZip()">下载 zip 包</a>（解压后双击 Start-Agent.bat，不要在压缩窗口里直接运行）。</div>
+ <div id="machines" data-page-node-id="DDtQEeg55QuCJtqVFfj4la"></div>
+</div>
+
+<!-- 出图 -->
+<div class="page on" id="p-draw" data-page-node-id="mDs7Wbnp8eUW4xAT8oDR0h">
+ <div class="card" data-page-node-id="oi3Kbxv628hYcmppNKjXZA"><h2 data-page-node-id="QNMdsoOFyEbrySkm0SBIj8">目标图纸<span class="en" data-page-node-id="iZULXoJuZHMIP6BoHma0hb">Target</span></h2>
+  <div class="fld" data-page-node-id="ioXz9kLDW4dgmOQ4G6hKWT"><label data-page-node-id="wB5OwU1u7ucD13VnNx0ndn">视图引用 View</label>
+   <div class="frow" data-page-node-id="eiNsoZxkumOKgA6E2zhn2q"><input id="view" placeholder="如 =16385/1249" data-page-node-id="fUOqRtw7ZNYct5tTQnF6K6"><button class="btn sm" onclick="ceTo('view')" data-page-node-id="Wh5YzN0ivdTHoUtZqZeQnN">取 CE</button></div></div>
+  <div class="fld" data-page-node-id="WxybAbusEjSZwTOTGFHdiS"><label data-page-node-id="ontbHK392nHsnBoqlnovTO">图纸引用 Sheet</label>
+   <div class="frow" data-page-node-id="lyRPm9XCgI9U5epfXieka4"><input id="sheet" placeholder="如 =16385/1242" data-page-node-id="F6lnuhoDzDGJffh1rzluIm"><button class="btn sm" onclick="ceTo('sheet')" data-page-node-id="dMCPAPhV3aCiW3zxKJdrp5">取 CE</button></div></div>
+  <div class="hint" data-page-node-id="20nisB6H9W7FAiVLA0T3jx">在对应机器 PDMS 里选中元素点「取 CE」；或手填（Q REF 查看）</div></div>
+ <div class="card" data-page-node-id="lmH1Au5IhYRuLm4rxC2Yhr"><h2 data-page-node-id="0tCSIsBFl30PNMXR63GSow">出图内容<span class="en" data-page-node-id="XUr6WE6qnYAJ8HxlmHA7mQ">Content</span></h2>
+  <div class="chks" data-page-node-id="oTgmPbJz2VHAL8uXbyiIsq">
+   <label class="chk" data-page-node-id="8BUXnoznQ3R9vjAs3JkDWp"><input type="checkbox" id="pipe" checked data-page-node-id="WjnBcHhmwRnptbUl7BcypP">管道（不勾=设备布置图）</label>
+   <label class="chk" data-page-node-id="eKACETcvGoFaAVW6g9Ya40"><input type="checkbox" id="equip" checked data-page-node-id="sgWHO5cOmgoozdDpAoWpx4">设备</label>
+   <label class="chk" data-page-node-id="ioqJAhjrqLPC9vp79LPDZP"><input type="checkbox" id="struct" data-page-node-id="bZiZnESpZnPc001w2DoNkT">结构</label>
+   <label class="chk" data-page-node-id="VHB0tsjL0u74KWe6BWJOof"><input type="checkbox" id="grid" checked data-page-node-id="dD0rhGVD1LFSUPsoArEu6M">轴网</label>
+  </div>
+  <div class="fld" style="margin-top:16px" data-page-node-id="uBEeJpJ35kdwacMLiOwwLm"><label data-page-node-id="7JurXES66MEiNv6Cmiw7AS">轴网 FRMWORK（可选指认）</label>
+   <div class="frow" data-page-node-id="9dKHUWXcUTfPS5SZyTE3Vy"><input id="gridfrmws" placeholder="可选指认" data-page-node-id="feTUCvlBpaBdA0AgZKdnI5"><button class="btn sm" onclick="ceTo('gridfrmws')" data-page-node-id="nXUB5ij6Hwrr50MfYS49p4">取 CE</button></div></div></div>
+ <div class="card" data-page-node-id="RZIImhGDY1r1XbUX0TxkN2"><h2 data-page-node-id="CDnfkgswDavE1e8AELtlm9">备注<span class="en" data-page-node-id="9OlIB9ePKSrm1SgaUxTYs5">Note</span></h2>
+  <textarea id="note" placeholder="随单存档，如：图框换 A3 横版 / 标题栏加公司名"></textarea></div>
+ <button class="go" id="go" onclick="run()" disabled data-page-node-id="KTNHQHj3BkcDQ88KWOFF1B">开始出图</button>
+ <div id="prog" data-page-node-id="TOuQZc9KTxbuUMwzzYXMZd"><p style="margin:10px 0" data-page-node-id="ZpnGez3kvGAoFkWMojFvox"><span class="spin" data-page-node-id="w3ZR5ADlsXsp1mZYQxLvi4"></span><b id="st" data-page-node-id="ry1mXfWmlBKaOMplHO7oXh">准备中…</b></p>
+  <ul class="stages" id="stages" data-page-node-id="dWUr9bt8beeE8PPkPuXHeg"></ul><div id="log" data-page-node-id="uzQjtl1Q0rduhruGuxY1GO"></div><div id="prev" data-page-node-id="rnAkvrblMjr81kE7SBkQq9"></div><div id="pdflink" data-page-node-id="PQVs1iQDWyGqE24MZzqXef"></div></div>
+ <div class="card" style="margin-top:16px"><h2>导出 DXF<span class="en">DXF Export</span></h2>
+  <div class="fld"><label>图纸引用 Sheet（出图后日志里的 SHEET 行）</label>
+   <div class="frow"><input id="dxfSheet" placeholder="如 =16385/1242"><button class="btn sm" onclick="ceTo('dxfSheet')">取 CE</button></div></div>
+  <div class="fld" style="margin-top:12px"><label>文件名（可选，默认按 SHEET 名）</label><input id="dxfName" placeholder="如 设备布置图1"></div>
+  <div class="hint">导出即净：自动修复标注小黑点（DEFPOINTS 不可打印）并给 GT_1 层多段线刷全局宽度 1.0。出图机需为最新插件——在上方机器列表点「部署插件」一键更新。</div>
+  <button class="go" id="goDxf" onclick="runDxf()" disabled style="letter-spacing:4px;margin-top:12px">导出 DXF</button>
+  <div id="dxfOut" style="display:none;margin-top:12px"><div id="dxfStatus"></div><div id="dxfLink"></div></div></div>
+</div>
+
+<!-- 建设备 -->
+<div class="page" id="p-equip" data-page-node-id="JFJzwUSVlsR2jP7jvJBwlg">
+ <div class="card" data-page-node-id="eJGuLBdYzM6Sxze3GITehC"><h2 data-page-node-id="SrAbOJByt0RK19nKY9gnyG">归属与命名<span class="en" data-page-node-id="pJVgQEdpn5FBnC9yqcwB3S">Owner</span></h2>
+  <div class="fld" data-page-node-id="qn8Kt19XQlQBQd0Q0UiqAd"><label data-page-node-id="UH2zJR9g3fnizPibDptkP0">ZONE 引用（设备挂在哪个 ZONE 下）</label>
+   <div class="frow" data-page-node-id="XwNcn1T51RqQeMrY6HNF2U"><input id="eq-zone" placeholder="如 /WPC-EQUI" data-page-node-id="uFOHNMrhDlrIuTXrO72dzZ"><button class="btn sm" onclick="ceTo('eq-zone')" data-page-node-id="risDlunyi4qc5su2ahCmlv">取 CE</button></div></div>
+  <div class="fld" data-page-node-id="Mib7W8neGcCk2ledU5KoaA"><label data-page-node-id="KiVMCLljmVHg7n4jBENqvv">设备名称（英文/数字）</label><input id="eq-name" placeholder="如 C-201" data-page-node-id="8zWxDFV8y5wH69baGsqP0a"></div>
+  <div class="hint" data-page-node-id="9cIIZH5xNmrY35YaMSeyBZ">ORI 不设（默认本地 E/N/U=世界）；命名失败通常为重名——元素实际已建成</div></div>
+ <div class="card" data-page-node-id="MvFR2lPEg9Zg2zCG8qokyB"><h2 data-page-node-id="rSPF3cv1ArSpT95zCnvID5">形体<span class="en" data-page-node-id="UQDkGdKZuSRBAGjAAm0au0">Geometry</span></h2>
+  <div class="fld" data-page-node-id="AOQ4GEPdtcJdadgHXKsf2O"><label data-page-node-id="ftfXowwLcFGXTw2oJqp437">类型</label>
+   <select id="eq-type" data-page-node-id="ISl5AIyDp9GkneJAVnxKE1"><option value="cylinder" data-page-node-id="d6aARFLqacD8B1sCcKkEmV">圆柱体</option><option value="box" data-page-node-id="rkyz5sTBZ9RZuKG0MZtTo5">箱体</option>
+    <option value="vessel" data-page-node-id="deENtJPGIs0jYVeA9crkbb">立式罐（筒体+顶盖）</option></select></div>
+  <div class="fld" data-page-node-id="g5tkHvYzkdg47DrtEjN2d0"><label data-page-node-id="DIjAxUKmTP1KCGZEJDRoqe">定位 E / N / U (mm)</label>
+   <div class="frow" data-page-node-id="KDaH4nFWLOEn1rQoFlM9gg"><input id="eq-e" value="0" data-page-node-id="b62CpG0e9lKUDgDjbEnbPs"><input id="eq-n" value="0" data-page-node-id="6xdTGhECWIADCyeEkSP7z9"><input id="eq-u" value="0" data-page-node-id="HC1TDRb30uATqi8b14lZ5u"></div></div>
+  <div class="fld" id="eq-rCyl" data-page-node-id="SGjbt0TGMmRj5vuFtLVbZ8"><label data-page-node-id="JWiKJ0fWnJoEYfZasY0yVz">直径 / 高 (mm)</label>
+   <div class="frow" data-page-node-id="PiNyok86xSs6BsQbANmY7y"><input id="eq-diam" value="3000" data-page-node-id="lOVZUvMYSpnZay5NfIrUHB"><input id="eq-h" value="8000" data-page-node-id="UDDUoHK4bbUQfHIDTI04pJ"></div></div>
+  <div class="fld" id="eq-rBox" style="display:none" data-page-node-id="tfoDuSs6pWuC8T7N9KdCWX"><label data-page-node-id="Lrnu9cQ0oTFBBBpjg1yCnT">长宽高 X / Y / Z (mm)</label>
+   <div class="frow" data-page-node-id="2t5LcoTzODpX7zkKhkZnov"><input id="eq-x" value="2000" data-page-node-id="3WB0NodKgBQGJF8MY5JiEj"><input id="eq-y" value="2000" data-page-node-id="WEAxBqfORTKLSF4Z7VRLFd"><input id="eq-z" value="3000" data-page-node-id="oApZGMOI6TGRa4js7yQDRn"></div></div></div>
+ <button class="go" id="goEq" onclick="runEq()" disabled data-page-node-id="AT2XqnNpzhxEm5EpJnEsGz">建立设备</button>
+ <div class="card" id="eqOut" style="display:none;margin-top:16px" data-page-node-id="ajYSkvx83zGQUd9jyFx46n"><h2 data-page-node-id="apLlMg8QCG0hxlZg2rmWub">执行结果<span class="en" data-page-node-id="FFW9Dk3pGe44YxRu0Bi4VJ">Result</span></h2>
+  <div id="eqMsg" style="font-size:14px;line-height:1.9" data-page-node-id="4MZcrTNxhWXtUHeKqrLk8p"></div>
+  <div class="hint" data-page-node-id="DMdHHalQgunSsfVlWQSF9k">PML 预览</div><textarea id="eqPml" readonly style="min-height:110px;font:12px/1.7 var(--mono)"></textarea></div>
+</div>
+
+<!-- 控制台（无人操控PDMS） -->
+<div class="page" id="p-ctrl" data-page-node-id="bAJWHWRjDpm4SmgOHDcCAV">
+ <div class="card" data-page-node-id="HseFoeOeSZCq23valmLhEZ"><h2 data-page-node-id="BIelYUAQZ3goDqRT34TSry">运行状态<span class="en" data-page-node-id="HvHvlFg2cHM921kVRMKoMj">Runtime</span></h2>
+  <div id="env" data-page-node-id="SvNZj4ZhXLTfVs3jQCdPnI"><div class="hint" data-page-node-id="2cScQj0FmW5A0JBcEhsmGV">连接机器后点下方按钮，在对应 PDMS 机器上执行纯只读自检</div></div>
+  <button class="btn" id="goEnv" onclick="runEnv()" style="margin-top:12px" data-page-node-id="k8xmPLIuYwRiZ9RPjb0zQn">刷新状态</button></div>
+ <div class="card" data-page-node-id="PvsaNsiRPaflZ6UWR9XbXE"><h2 data-page-node-id="iPpvBYhPevh0dscM0OJVWu">PML 控制台<span class="en" data-page-node-id="eCGcj8YPY4QjqmYnnGgyN8">Unattended</span><span class="badge" data-page-node-id="q1ekh2mY1wpoWBHuDRtotc">逐行下发</span></h2>
+  <div class="hint" data-page-node-id="bOPmVauseAvmh1Og3SMuxO">一行一条指令，经云端中继到所选机器的 PdmsBridge 逐条执行（多条一次下发易 RunInPdms failed）；
+   出错即停；进度实时流入输出区。<br data-page-node-id="2nNEYAaXZmwaxh17SNUrPy">
+   Q CE / Q NAME / Q REF / Q TYPE / Q CREF 自动走 get_ce 通道回读真值；其余查询行回显在 PDMS 命令窗口（bridge 不捕获，行级 CP 报错不影响 ok）。</div>
+  <textarea id="pmlCode" style="min-height:130px;font:13px/1.7 var(--mono)"
+   placeholder="Q CE&#10;Q NAME&#10;SAVEWORK"></textarea>
+  <div class="fld" style="margin-top:12px" data-page-node-id="7cvhpBOdRJqcNmXimhS7Ix"><label data-page-node-id="oa69JJBpqWMTk2XTUdscOn">快捷指令</label>
+   <div class="chks" data-page-node-id="qhrTUPUBrF8VOrEr1ga5Jk">
+    <button class="btn sm" onclick="quickP('Q CE')" data-page-node-id="uXJjH7FBMB2gGWrEj5JUGX">Q CE</button>
+    <button class="btn sm" onclick="quickP('Q NAME')" data-page-node-id="mpN6hDnfjCpdJP8iHgSnZp">Q NAME</button>
+    <button class="btn sm" onclick="quickP('Q ATTRS')" data-page-node-id="te6gYrSDlooU48Sp3sjh76">Q ATTRS</button>
+    <button class="btn sm" onclick="quickP('SAVEWORK')" data-page-node-id="NGBIYoEPmtypXyAdB6IgKp">SAVEWORK</button>
+    <button class="btn sm" onclick="quickP('UPDATE ALL OVERWRITE')" data-page-node-id="MDGoGl83Gz5XQHkcHfHK1X">UPDATE ALL OVERWRITE</button>
+    <button class="btn sm" onclick="quickP('UPDATE ALL OVERWRITE\nSAVEWORK')" data-page-node-id="Enai0zlzosqs81ROdpTb2i">UPDATE + SAVE</button>
+   </div></div>
+  <div class="fld" data-page-node-id="Af8PHYbQzFI0iJzHv5q5CR"><label data-page-node-id="dCEgqZDAxlMpfoeNGFyGSa">出错处理</label>
+   <select id="stopErr" data-page-node-id="yiJXMPJ1AwQgpk0O7gwugg"><option value="1" data-page-node-id="YbVoT0m7ZOnECWBXWpUIGb">出错即停（推荐）</option><option value="0" data-page-node-id="hLDfncgYkcE2KMKp8TvHpF">继续执行后续行</option></select></div>
+  <button class="go" id="goCtrl" onclick="runCtrl()" style="letter-spacing:4px" data-page-node-id="Dkcdi49tihKIVGoY9Eri4V">执行</button>
+  <div id="ctrlOut" style="display:none;margin-top:12px" data-page-node-id="rnVoaO1eNqWLGXhCriKCB0"></div>
+ </div>
+</div>
+
+<!-- 材料表 -->
+<div class="page" id="p-mto" data-page-node-id="o2yKxiA33xKP0ekhF1NloT">
+ <div class="card" data-page-node-id="8bp8BnhAHzX5pbrM3Grski"><h2 data-page-node-id="pD7QJHtggN9nAErSvEVLn8">材料表统计<span class="en" data-page-node-id="nz8FXquHSEd8LPfTnz3ov4">Material Report</span></h2>
+  <div class="fld" data-page-node-id="x0VkbPVaIiTgdWs1cfXiHd"><label data-page-node-id="AOdzukLJEkQqKB3iT4fsB3">统计范围（留空 = 整个 DESIGN 库）</label>
+   <div class="frow" data-page-node-id="qYaZ7nFzQQN1MlAANj701L"><input id="mtoRoot" placeholder="如 /DEPT1/AREA-A" data-page-node-id="N6agsZ5lnDJPtLyWTzqBDk"><button class="btn sm" onclick="ceTo('mtoRoot')" data-page-node-id="mFvCIj6GVGENEUjZoqSHqK">取 CE</button></div></div>
+  <div class="hint" data-page-node-id="PUtjdkU4HgKpbpF4aw0V1F">范围内遍历管线元件 → 规格汇总 → 导出 Excel（.xls，UTF-8 中文表头）</div>
+  <button class="go" id="goMto" onclick="runMto()" style="letter-spacing:4px;margin-top:14px" disabled data-page-node-id="VabORKBDWEb172BdLkopEo">统计材料</button>
+  <div id="mtoOut" style="display:none;margin-top:14px" data-page-node-id="xGeq8CrAtw0tTflrfBXjAv"></div></div>
+</div>
+
+<!-- 视觉巡检（pdms-vision 技能集成：锁本地 PDMS 桌面窗口、截图、点按） -->
+<div class="page" id="p-vision">
+ <div class="card"><h2>窗口与目标<span class="en">Window</span></h2>
+  <div class="fld"><label>窗口匹配串（如 Design - / Paragon -，用于定位 PDMS 窗口）</label>
+   <div class="frow"><input id="visMatch" value="Design -">
+    <button class="btn sm vision-act" id="visList" onclick="visList()" disabled>列举窗口</button>
+    <button class="btn sm vision-act" id="visLock" onclick="visLock()" disabled>锁定</button></div></div>
+  <div class="hint">视觉巡检走 pdms-vision 技能：直接锁定本地 PDMS 桌面窗口、截图、点按。先「列举窗口」确认目标标题，再截图。</div>
+  <div id="visWin" style="margin-top:10px"></div></div>
+ <div class="card"><h2>截图巡检<span class="en">Screenshot</span><span class="badge">真实桌面</span></h2>
+  <div class="frow">
+   <button class="go vision-act" id="visShot" onclick="visShot()" disabled style="letter-spacing:2px;margin-top:0">截取当前窗口</button>
+   <button class="btn vision-act" id="visRefresh" onclick="visShot()" disabled style="align-self:stretch">刷新</button>
+  </div>
+  <div class="hint">在截图上直接点击 = 向该坐标发送鼠标左键（屏幕坐标 = 窗口左上角 + 图中像素）。PDMS 写操作无 UNDO，点按前确认目标。</div>
+  <div id="visImgWrap" style="margin-top:12px;text-align:center;display:none"><img id="visImg" style="max-width:100%;border:1px solid var(--line);border-radius:12px;box-shadow:0 4px 16px rgba(20,24,28,.1);cursor:crosshair"></div>
+  <div id="visOut" style="display:none;margin-top:12px"></div></div>
+ <div class="card"><h2>命令输入<span class="en">Input</span></h2>
+  <div class="fld"><label>向命令窗口发送文本（自动追加回车），expect 默认取上方匹配串</label>
+   <div class="frow"><input id="visText" placeholder="如 Q CE 或 $M C:/x.pml">
+    <button class="btn vision-act" id="visSend" onclick="visSend()" disabled>发送</button></div></div>
+  <div class="fld" style="margin-top:10px"><label>快捷按键</label>
+   <div class="chks">
+    <button class="btn sm vision-act" id="visEnter" onclick="visKey('Enter')" disabled>Enter</button>
+    <button class="btn sm vision-act" id="visEsc" onclick="visKey('Esc')" disabled>Esc</button>
+    <button class="btn sm vision-act" id="visTab" onclick="visKey('Tab')" disabled>Tab</button>
+   </div></div>
+  <div class="hint">点击/输入/按键均带 --expect 守卫：当前台窗口不含匹配串时拒绝发送，防止误打进聊天框 / IDE。</div></div>
+</div>
+
+>
+</div>
+
+</div>
+
+<script>
+// ---------- nav ----------
+document.querySelectorAll("nav a").forEach(a=>a.onclick=()=>{
+ document.querySelectorAll("nav a").forEach(x=>x.classList.remove("on"));
+ document.querySelectorAll(".page").forEach(x=>x.classList.remove("on"));
+ a.classList.add("on");document.getElementById("p-"+a.dataset.p).classList.add("on");});
+
+// ---------- 10-stage pipeline (same markers as local wizard) ----------
+const STAGES=[["旧符号清理","旧「轴网」NOTE 删除"],["轴网落线","轴网落线 ="],
+ ["设备轮廓/标高","设备轮廓 ="],["图块插入","图块插入 ="],["红色管线绘制","红色管线 ="],
+ ["交叉断口","交叉断口 ="],["尺寸链/轴距行","轴距行汇总 ="],["落盘","SAVEWORK"],
+ ["导出 PDF","[WIZ] EXPORT-OK"],["黑白处理","[WIZ] MONO-OK"]];
+let ws=null, busy=false, machine=null;
+// ws endpoint: ?ws= override wins; else same-origin wss (sub-path /pdms -> /pdms/ws, else /ws); direct fallback host:8765
+const WS_URL=(function(){
+ const q=new URLSearchParams(location.search).get("ws"); if(q)return q;
+ const sub=location.pathname.indexOf("/pdms")===0;
+ if(location.protocol==="https:") return "wss://"+location.host+(sub?"/pdms/ws":"/ws");
+ if(location.protocol==="http:"&&location.pathname.indexOf("/pdms")===0) return "ws://"+location.host+"/pdms/ws";
+ return "ws://"+location.hostname+":8765";})();
+function esc(s){return String(s||"").replace(/</g,"&lt;")}
+function setCst(on,txt){const el=document.getElementById("cst");
+ el.className="cst"+(on?" on":"");
+ el.innerHTML='<span class="dot"></span>'+esc(txt);}
+function renderMachines(list){
+ const el=document.getElementById("machines");
+ el.innerHTML=list.map(m=>'<div class="mrow"><span class="mdot"></span><span class="nm">'+esc(m)+
+  '</span><button class="btn sm" onclick="pick(\''+m+'\')">选为出图机</button>'+
+  '<button class="btn sm" onclick="deployOn(\''+m+'\')">部署插件</button>'+
+  '<button class="btn sm" onclick="deployTool(\''+m+'\')">部署PML工具</button></div>').join("")
+  ||'<div class="hint">暂无 agent 在线（PDMS 机器上跑 bridge/agent.py）</div>';}
+
+function conn(){
+ const t=document.getElementById("token").value.trim();
+ if(!t){alert("请填 token");return}
+ try{if(ws)ws.close()}catch(e){}
+ setCst(false,"连接中…");
+ ws=new WebSocket(WS_URL);
+ ws.onopen=()=>ws.send(JSON.stringify({type:"hello",role:"web",token:t}));
+ ws.onmessage=(ev)=>{const m=JSON.parse(ev.data);
+  if(m.type==="hello_ok"){setCst(true,"已连接 · "+((m.machines||[])[0]||""));renderMachines(m.machines||[]);}
+  else if(m.type==="agents")renderMachines(m.machines||[]);
+  else if(m.type==="progress")onProgress(m);
+  else if(m.type==="preview")onPreview(m);
+  else if(m.type==="pdf_ready")onPdf(m);
+  else if(m.type==="task_result")onResult(m);
+  else if(m.type==="auth_error")setCst(false,"token 被拒");};
+ ws.onclose=()=>setCst(false,"断开");
+ ws.onerror=()=>setCst(false,"连接失败");}
+
+function pick(m){machine=m;
+ ["go","goEq","goMto","goCtrl","goDxf"].forEach(id=>document.getElementById(id).disabled=false);
+ document.querySelectorAll(".vision-act").forEach(b=>b.disabled=false);
+ setCst(true,"已连接 · "+m);
+ document.getElementById("go").textContent="开始出图（"+m+"）";}
+function send(obj){if(ws&&ws.readyState===1)ws.send(JSON.stringify(obj));}
+// task_id -> kind, so task_result knows which UI action it belongs to
+const pending={};
+function submit(op,params,kind){
+ const tid=Date.now()+"-"+Math.floor(Math.random()*1e4);
+ pending[tid]=kind||op;
+ send({type:"submit_task",task_id:tid,op:op,params:params,machine_id:machine});
+ return tid;}
+
+// ---------- CE ----------
+function ceTo(id){if(busy)return;submit("get_ce",{},"ce:"+id);}
+
+// ---------- draw ----------
+function qp(){
+ const v=document.getElementById("view").value.trim(),s=document.getElementById("sheet").value.trim();
+ if(!v||!s){alert("请填视图/图纸引用");return null}
+ const p={view:v,sheet:s,drawPipe:document.getElementById("pipe").checked?"1":"0",
+  drawEquip:document.getElementById("equip").checked?"1":"0",
+  drawStruct:document.getElementById("struct").checked?"1":"0",
+  drawGrid:document.getElementById("grid").checked?"1":"0"};
+ const gf=document.getElementById("gridfrmws").value.trim();if(gf)p.gridFrmws=gf;
+ const nt=document.getElementById("note").value.trim();if(nt)p.note=nt;return p}
+function run(){if(busy||!machine)return;const p=qp();if(!p)return;busy=true;
+ document.getElementById("go").disabled=true;
+ document.getElementById("prog").style.display="block";
+ document.getElementById("prev").style.display="none";document.getElementById("pdflink").innerHTML="";
+ const ul=document.getElementById("stages");ul.innerHTML="";
+ STAGES.forEach(()=>{const li=document.createElement("li");li.textContent="待执行";ul.appendChild(li)});
+ document.getElementById("log").textContent="";document.getElementById("log").style.display="block";
+ document.getElementById("st").textContent="已提交，等待 "+machine+" 执行…";
+ submit("pipeline_draw",p,"draw");}
+function onProgress(m){
+ document.getElementById("log").textContent+=m.log||"";
+ const box=document.getElementById("log");box.scrollTop=1e6;
+ const lines=(m.log||"").split("\n");let curIdx=-1;
+ const ul=document.getElementById("stages");
+ STAGES.forEach((sg,i)=>{const li=ul.children[i];if(!li)return;
+  const hit=lines.some(l=>l.includes(sg[1]));
+  if(hit){li.className="done";li.textContent=sg[0]}
+  else if(curIdx<0){curIdx=i;li.className="cur";li.textContent=sg[0]}});
+ if(curIdx>=0)document.getElementById("st").textContent="流水线 · "+STAGES[curIdx][0];}
+function onPreview(m){const p=document.getElementById("prev");
+ p.innerHTML='<img src="data:image/png;base64,'+m.b64+'">';p.style.display="block";}
+function onPdf(m){const k=pending[m.task_id];
+ const link='<span class="hint">下载：</span><a target="_blank" href="'+m.url+"?t="+
+  encodeURIComponent(document.getElementById("token").value.trim())+'">'+
+  (m.url.toLowerCase().indexOf(".dxf")>=0?"下载 DXF":"下载 / 打开")+'</a>';
+ if(k==="dxf"){const l=document.getElementById("dxfLink");
+  l.innerHTML=link;document.getElementById("dxfOut").style.display="block";return;}
+ document.getElementById("pdflink").innerHTML=link;}
+
+// ---------- dxf export ----------
+function runDxf(){if(busy||!machine)return;const s=document.getElementById("dxfSheet").value.trim();
+ if(!s){alert("请填图纸引用 Sheet");return}
+ busy=true;document.getElementById("goDxf").disabled=true;
+ const o=document.getElementById("dxfOut");o.style.display="block";
+ document.getElementById("dxfStatus").innerHTML='<div class="hint">导出中…（在 '+esc(machine)+' 上执行，含黑点/线宽修复）</div>';
+ document.getElementById("dxfLink").innerHTML="";
+ const p={sheet:s,dxfPolyWidth:"1",dxfPolyLayer:"GT_1"};
+ const fn=document.getElementById("dxfName").value.trim();if(fn)p.fileName=fn;
+ submit("export_dxf",p,"dxf");}
+
+// ---------- equip ----------
+function runEq(){if(busy||!machine)return;const z=document.getElementById("eq-zone").value.trim(),
+ nm=document.getElementById("eq-name").value.trim();
+ if(!z||!nm){alert("请填 ZONE 引用与设备名称");return}
+ busy=true;document.getElementById("goEq").disabled=true;
+ const t=document.getElementById("eq-type").value;
+ const p={zone:z,name:nm,etype:t,
+  e:document.getElementById("eq-e").value.trim()||"0",
+  n:document.getElementById("eq-n").value.trim()||"0",
+  u:document.getElementById("eq-u").value.trim()||"0",
+  diam:document.getElementById("eq-diam").value.trim()||"3000",
+  h:document.getElementById("eq-h").value.trim()||"8000",
+  xlen:document.getElementById("eq-x").value.trim()||"2000",
+  ylen:document.getElementById("eq-y").value.trim()||"2000",
+  zlen:document.getElementById("eq-z").value.trim()||"3000"};
+ submit("create_equipment",p,"eq");}
+document.getElementById("eq-type").addEventListener("change",()=>{
+ const b=document.getElementById("eq-type").value==="box";
+ document.getElementById("eq-rCyl").style.display=b?"none":"flex";
+ document.getElementById("eq-rBox").style.display=b?"flex":"none";});
+
+// ---------- mto ----------
+function runMto(){if(busy||!machine)return;busy=true;
+ const b=document.getElementById("goMto"),o=document.getElementById("mtoOut");
+ b.disabled=true;o.style.display="block";
+ o.innerHTML='<div class="hint">统计中…（在 '+esc(machine)+' 上执行）</div>';
+ submit("material_report",{root:document.getElementById("mtoRoot").value.trim()},"mto");}
+
+// ---------- env / console ----------
+function runEnv(){if(busy||!machine)return;busy=true;
+ document.getElementById("goEnv").disabled=true;
+ document.getElementById("env").innerHTML='<div class="hint">自检中…（'+esc(machine)+'）</div>';
+ submit("env_report",{},"env");}
+function renderEnv(rep){let h="";
+ function kv(k,v){return '<div class="kv"><span class="k">'+k+'</span><span class="v">'+v+'</span></div>'}
+ h+=kv("平台版本","云端平台 + agent@"+esc(machine));
+ h+=kv("Bridge 通道",String(rep.bridge||"").indexOf("online")===0
+   ?'<span class="ok">'+esc(rep.bridge)+'</span>':'<span class="bad">'+esc(rep.bridge||"offline")+'</span>');
+ if(rep.probe)h+=kv("Probe 回读",'<span style="white-space:pre-wrap">'+esc(rep.probe)+'</span>');
+ if(!(rep.procs||[]).length)h+=kv("PDMS 进程",'<span class="bad">未检测到</span>');
+ else (rep.procs||[]).forEach(p=>{h+=kv("PDMS 进程",esc(p[0])+" pid="+p[1]+" ver="+esc(p[2]||"")
+   +'<br><span class="hint">'+esc(p[3]||"")+'</span>')});
+ (rep.dlls||[]).forEach(d=>{h+=kv(esc(d[0]),"ver="+esc(d[1]||"")+" &nbsp; "+esc(d[2])
+   +'<br><span class="hint">'+esc(d[3]||"")+'</span>')});
+ document.getElementById("env").innerHTML=h;}
+function quickP(s){const ta=document.getElementById("pmlCode");
+ ta.value=(ta.value?ta.value+"\n":"")+s;}
+function runCtrl(){if(busy||!machine)return;const code=document.getElementById("pmlCode").value.trim();
+ if(!code){alert("请填 PML 指令");return}busy=true;
+ const b=document.getElementById("goCtrl");b.disabled=true;
+ const o=document.getElementById("ctrlOut");o.style.display="block";
+ o.innerHTML='<div class="hint">执行中…（逐行下发到 '+esc(machine)+'）</div>';
+ submit("exec_pml",{code:code,stop_on_error:document.getElementById("stopErr").value==="1"},"ctrl");}
+function renderCtrl(out,ok){
+ const o=document.getElementById("ctrlOut");
+ if(!out){o.innerHTML='<div class="'+(ok?"ok":"bad")+'">'+(ok?"完成":"无输出")+'</div>';return;}
+ let h='<div class="'+(ok?"ok":"bad")+'" style="font-weight:700;margin-bottom:8px">'+(ok?"完成":"部分失败")+'</div>';
+ try{
+  const arr=JSON.parse(out);
+  if(Array.isArray(arr)){h+='<div style="background:#1c2024;border-radius:11px;padding:12px 14px;font:12px/1.7 var(--mono);color:#aef0c8;white-space:pre-wrap">';
+   arr.forEach(r=>{const line=(r.line||"").replace(/</g,"&lt;");const res=(r.result||"").replace(/</g,"&lt;");
+    const cls=r.ok===false?"bad":"ok";
+    h+='<div><span style="color:#7d8a85">$ '+line+'</span>'+(res?' <span class="'+cls+'">→ '+res+'</span>':'')+'</div>';});
+   h+='</div>';}
+  else h+='<div style="white-space:pre-wrap;font:13px/1.7 var(--mono)">'+esc(out)+'</div>';
+ }catch(e){h+='<div style="white-space:pre-wrap;font:13px/1.7 var(--mono)">'+esc(out)+'</div>';}
+ o.innerHTML=h;}
+
+// ---------- vision (pdms-vision skill) ----------
+let visWin=null, visMatch="";
+function visList(){if(!machine)return;visMatch=document.getElementById("visMatch").value.trim();
+ const o=document.getElementById("visWin");o.innerHTML='<div class="hint">列举中…</div>';
+ submit("vision_list",{match:visMatch},"vision_list");}
+function visLock(){if(!machine)return;visMatch=document.getElementById("visMatch").value.trim();
+ submit("vision_lock",{match:visMatch},"vision");}
+function visShot(){if(!machine)return;visMatch=document.getElementById("visMatch").value.trim();
+ submit("vision_shot",{match:visMatch},"vision_shot");}
+function visSend(){if(!machine)return;const t=document.getElementById("visText").value;
+ if(!t)return;
+ submit("vision_type",{text:t,expect:visMatch},"vision_send");
+ document.getElementById("visText").value="";}
+function visKey(k){if(!machine)return;
+ submit("vision_key",{key:k,expect:visMatch},"vision");}
+function bindVisImg(){const img=document.getElementById("visImg");
+ img.onclick=function(e){
+  if(!visWin){alert("先截图获取窗口坐标");return;}
+  const r=img.getBoundingClientRect();
+  const sx=Math.round((e.clientX-r.left)/r.width*img.naturalWidth);
+  const sy=Math.round((e.clientY-r.top)/r.height*img.naturalHeight);
+  const X=visWin.left+sx, Y=visWin.top+sy;
+  submit("vision_click",{sx:X,sy:Y,expect:visMatch},"vision");
+  const o=document.getElementById("visOut");o.style.display="block";
+  o.innerHTML='<div class="hint">已向屏幕坐标 ('+X+','+Y+') 发送左键（图中 '+sx+','+sy+'）</div>';};}
+
+// ---------- deploy ----------
+function deployOn(m){if(busy)return;send({type:"deploy",machine_id:m});}
+function deployTool(m){if(busy)return;const tid=Date.now()+"-"+Math.floor(Math.random()*1e4);
+ pending[tid]="tool";send({type:"submit_task",task_id:tid,op:"deploy_tool",params:{},machine_id:m});}
+function dlAgent(){const t=document.getElementById("token").value.trim();
+ if(!t){alert("请先填访问令牌，再下载 Agent 安装器");return false}
+ window.open("payload/install_agent.bat?t="+encodeURIComponent(t));return false;}
+function dlAgentZip(){const t=document.getElementById("token").value.trim();
+ if(!t){alert("请先填访问令牌，再下载 Agent 部署包");return false}
+ window.open("payload/agent.zip?t="+encodeURIComponent(t));return false;}
+
+// ---------- results ----------
+function onResult(m){
+ const kind=pending[m.task_id]||"";
+ delete pending[m.task_id];
+ if(kind.indexOf("ce:")===0){
+  if(m.ok&&m.output)document.getElementById(kind.slice(3)).value=String(m.output).split("|")[0].trim();
+  else alert(m.error||"CE 读取失败：先在对应机器 PDMS 里选中元素");
+  return;}
+ if(kind==="eq"){busy=false;document.getElementById("goEq").disabled=false;
+  document.getElementById("eqOut").style.display="block";
+  document.getElementById("eqMsg").innerHTML=m.ok
+   ?'<span class="ok">'+esc(m.output||"完成")+'</span>':'<span class="bad">失败：'+esc(m.error||"")+'</span>';
+  document.getElementById("eqPml").value=m.pml||"";return;}
+ if(kind==="mto"){busy=false;document.getElementById("goMto").disabled=false;
+  const o=document.getElementById("mtoOut");
+  if(m.ok){const parts=String(m.output||"").split("|");
+   o.innerHTML='<div class="ok" style="font-weight:700">完成</div><div style="margin-top:6px;white-space:pre-wrap;font-size:13px">'
+    +esc(parts[1]||"")+'</div><div class="hint">文件：'+esc(parts[0]||"")+'</div>';}
+  else o.innerHTML='<div class="bad">'+esc(m.error||"")+'</div>';return;}
+ if(kind==="ctrl"){busy=false;document.getElementById("goCtrl").disabled=false;
+  renderCtrl(m.output,m.ok);return;}
+ if(kind==="env"){busy=false;document.getElementById("goEnv").disabled=false;
+  if(m.ok){try{renderEnv(JSON.parse(m.output))}catch(e){
+   document.getElementById("env").innerHTML='<div class="bad">解析失败</div>';}}
+  else document.getElementById("env").innerHTML='<div class="bad">'+esc(m.error||"")+'</div>';return;}
+ if(kind==="draw"){document.getElementById("st").textContent=m.ok?"完成":"失败，详见日志";
+  busy=false;document.getElementById("go").disabled=false;return;}
+ if(kind==="dxf"){busy=false;document.getElementById("goDxf").disabled=false;
+  const st=document.getElementById("dxfStatus");
+  if(m.ok){st.innerHTML='<div class="ok" style="font-weight:700">导出完成</div><div class="hint" style="white-space:pre-wrap">'+esc(m.output||"")+'</div>';
+   if(!document.getElementById("dxfLink").innerHTML)st.innerHTML+='<div class="hint">文件传输中…</div>';}
+  else st.innerHTML='<div class="bad">失败：'+esc(m.error||"")+'</div>';return;}
+ if(kind==="vision_list"){const o=document.getElementById("visWin");
+  if(m.ok){const lines=String(m.output||"").split("\n").filter(x=>x.trim());
+   o.innerHTML='<div style="font:12px/1.7 var(--mono);white-space:pre-wrap;background:#1c2024;color:#aef0c8;border-radius:11px;padding:12px 14px">'
+    +(lines.join("\n")||"无可见窗口").replace(/</g,"&lt;")+'</div>'
+    +'<div class="hint">把上面标题里匹配 PDMS 的串填到上方「窗口匹配串」，再截图。</div>';}
+  else o.innerHTML='<div class="bad">'+esc(m.error||"列举失败")+'</div>';return;}
+ if(kind==="vision_shot"){if(m.ok&&m.image){
+   const w=document.getElementById("visImgWrap"),img=document.getElementById("visImg");
+   img.src=m.image;w.style.display="block";
+   if(m.win)visWin=m.win;bindVisImg();
+   const o=document.getElementById("visOut");o.style.display="block";
+   o.innerHTML='<div class="hint">'+esc(m.output||"")+(visWin?('  窗口左上角=('+visWin.left+','+visWin.top+')'):'')+'</div>';}
+  else{const o=document.getElementById("visOut");o.style.display="block";
+   o.innerHTML='<div class="bad">'+(m.error||"截图失败")+'</div>';}
+  return;}
+ if(kind==="vision"||kind==="vision_send"){const o=document.getElementById("visOut");
+  o.style.display="block";
+  o.innerHTML='<div class="'+(m.ok?"ok":"bad")+'" style="font-weight:700;margin-bottom:6px">'+(m.ok?"已执行":"失败")+'</div>'
+   +'<div style="font:12px/1.7 var(--mono);white-space:pre-wrap">'+esc(m.output||m.error||"")+'</div>';return;}
+ if(kind==="tool"){alert(m.ok?"PML 免费工具部署完成":"PML 工具部署失败："+(m.error||""));return;}
+ // generic (deploy etc.)
+ if(m.ok===false)alert("任务失败："+(m.error||""));}
+</script>
+</body>
+</html>

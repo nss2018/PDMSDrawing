@@ -1,0 +1,10 @@
+-- hello.pmlfrm —— 最简对话框（课程 P10）
+-- 文件名与对象名一样，后缀小写 pmlfrm
+-- 存放：Pmllib/NewPml/forms/hello.pmlfrm
+-- 使用：Pml Rehash All 之后  Show !!hello
+
+setup form !!hello
+Title 'Hello'
+paragraph .Message text 'Hello world'
+button .bye 'Goodbye' OK
+exit
